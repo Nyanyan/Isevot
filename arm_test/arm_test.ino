@@ -15,9 +15,9 @@ Servo flip_servo;
 #define ARM_MID 1
 #define ARM_ROOT 0
 
-#define ARM_HAND_HOME 7900
-#define ARM_MID_HOME 7200
-#define ARM_ROOT_HOME 7900
+#define ARM_HAND_ZERO 7900
+#define ARM_MID_ZERO 8600
+#define ARM_ROOT_ZERO 7900
 
 #define DEG_90 2600
 
@@ -35,11 +35,12 @@ void setup() {
   pinMode(WHITE_MAGNET, OUTPUT);
   krs.begin();
   /*
-  krs.setPos(ARM_HAND, ARM_HAND_HOME);
-  krs.setPos(ARM_MID, ARM_MID_HOME);
-  krs.setPos(ARM_ROOT, ARM_ROOT_HOME);
+  krs.setPos(ARM_HAND, ARM_HAND_ZERO);
+  krs.setPos(ARM_MID, ARM_MID_ZERO);
+  krs.setPos(ARM_ROOT, ARM_ROOT_ZERO);
   move_arm(6000, 6000, 6000, 100, 10);
   */
+  flip_servo.write(SERVO_RELEASE_DEG);
 }
 
 void hold_black() {
@@ -76,22 +77,24 @@ void move_arm(Arm_pos arm_pos, uint32_t num, int sleep){
   move_arm(arm_pos.hand, arm_pos.mid, arm_pos.root, num, sleep);
 }
 
-void arm_home() {
-  move_arm(ARM_HAND_HOME, ARM_MID_HOME, ARM_ROOT_HOME, 100, 10);
+void arm_zero() {
+  move_arm(ARM_HAND_ZERO, ARM_MID_ZERO, ARM_ROOT_ZERO, 100, 10);
 }
 
 
 void loop() {
-  Arm_pos arm_pos = {ARM_HAND_HOME + DEG_90, ARM_MID_HOME, ARM_ROOT_HOME + DEG_90};
-  move_arm(arm_pos, 100, 10);
+  //arm_zero();
+  //return;
+  Arm_pos arm_pos = {ARM_HAND_ZERO + DEG_90, ARM_MID_ZERO, ARM_ROOT_ZERO + DEG_90};
+  move_arm(arm_pos, 50, 10);
   
   flip_servo.write(SERVO_RELEASE_DEG);
   hold_black();
   delay(2000);
   
-  arm_pos.root = ARM_ROOT_HOME + 1000;
-  arm_pos.mid = ARM_MID_HOME - 2000;
-  move_arm(arm_pos, 100, 10);
+  arm_pos.root = ARM_ROOT_ZERO + DEG_90 - 200;
+  arm_pos.mid = ARM_MID_ZERO + 1000;
+  move_arm(arm_pos, 50, 10);
   
   flip_servo.write(SERVO_GRIP_DEG);
   delay(300);
@@ -100,15 +103,15 @@ void loop() {
   flip_servo.write(SERVO_RELEASE_DEG);
   delay(300);
   
-  arm_pos.root = ARM_ROOT_HOME + DEG_90;
-  arm_pos.mid = ARM_MID_HOME;
-  move_arm(arm_pos, 100, 10);
+  arm_pos.root = ARM_ROOT_ZERO + DEG_90;
+  arm_pos.mid = ARM_MID_ZERO;
+  move_arm(arm_pos, 50, 10);
   
   release_both();
 
-  arm_pos.root = ARM_ROOT_HOME + 1000;
-  arm_pos.mid = ARM_MID_HOME - 2000;
-  move_arm(arm_pos, 100, 10);
+  arm_pos.root = ARM_ROOT_ZERO + DEG_90 - 200;
+  arm_pos.mid = ARM_MID_ZERO + 1000;
+  move_arm(arm_pos, 50, 10);
   
   for (;;);
 }
