@@ -53,7 +53,15 @@ struct Arm_pos {
 
 // 手前から
 const Arm_pos pos_out[HW] = {
-  {ARM_HAND_ZERO, ARM_MID_ZERO - 4630, ARM_ROOT_ZERO + 1280}
+  {ARM_HAND_ZERO,        ARM_MID_ZERO - 4630, ARM_ROOT_ZERO + 1280},
+  {ARM_HAND_ZERO + 100,  ARM_MID_ZERO - 4320, ARM_ROOT_ZERO + 1180},
+  {ARM_HAND_ZERO + 350,  ARM_MID_ZERO - 4050, ARM_ROOT_ZERO + 1100},
+  {ARM_HAND_ZERO + 510,  ARM_MID_ZERO - 3780, ARM_ROOT_ZERO + 1170},
+  {ARM_HAND_ZERO + 710,  ARM_MID_ZERO - 3480, ARM_ROOT_ZERO + 1280},
+  {ARM_HAND_ZERO + 910,  ARM_MID_ZERO - 3180, ARM_ROOT_ZERO + 1390},
+  {ARM_HAND_ZERO + 1170, ARM_MID_ZERO - 2780, ARM_ROOT_ZERO + 1510},
+  {ARM_HAND_ZERO + 1400, ARM_MID_ZERO - 2380, ARM_ROOT_ZERO + 1570}
+  
 };
 const Arm_pos pos_in[HW] = {
   
@@ -77,7 +85,28 @@ void setup() {
   pinMode(ENA_PIN, OUTPUT);
   krs.begin();
   flip_servo.write(SERVO_RELEASE_DEG);
-  Arm_pos arm_pos = {ARM_HAND_ZERO, ARM_MID_ZERO - 4630, ARM_ROOT_ZERO + 1280};
+  Arm_pos pos;
+  for (int i = 0; i < 8; ++i){
+    pos = pos_out[i];
+    pos.root -= 400;
+    move_arm(pos, 30, 10);
+    
+    pos.root += 400;
+    move_arm(pos, 30, 10);
+    release_out();
+    
+    pos.root -= 400;
+    move_arm(pos, 30, 10);
+
+    pos.root += 400;
+    move_arm(pos, 30, 10);
+    hold_black_out();
+
+    pos.root -= 400;
+    move_arm(pos, 30, 10);
+    
+  }
+  Arm_pos arm_pos = {ARM_HAND_ZERO + 1400, ARM_MID_ZERO - 2380, ARM_ROOT_ZERO + 1570};
   move_arm(arm_pos, 30, 10);
 }
 
