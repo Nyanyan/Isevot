@@ -9,6 +9,11 @@ Servo flip_servo;
 #define BLACK_MAGNET 5
 #define WHITE_MAGNET 6
 
+#define PUL_PIN 13
+#define DIR_PIN 12
+#define ENA_PIN 11
+#define STEPPER_DELAY 300
+
 #define EN_PIN 2
 
 #define ARM_HAND 2
@@ -41,12 +46,33 @@ void setup() {
   flip_servo.attach(9);
   pinMode(BLACK_MAGNET, OUTPUT);
   pinMode(WHITE_MAGNET, OUTPUT);
+  pinMode(PUL_PIN, OUTPUT);
+  pinMode(DIR_PIN, OUTPUT);
+  pinMode(ENA_PIN, OUTPUT);
   krs.begin();
   flip_servo.write(SERVO_RELEASE_DEG);
-
+  
   //Arm_pos arm_pos = {ARM_HAND_TEST_2, ARM_MID_TEST_2, ARM_ROOT_TEST_2};
   //move_arm(arm_pos, 50, 10);
   //for(;;);
+}
+
+void stepper_enable(){
+  digitalWrite(ENA_PIN, HIGH);
+}
+
+void stepper_disable(){
+  digitalWrite(ENA_PIN, LOW);
+}
+
+void stepper_move(bool dir, int steps){
+  digitalWrite(DIR_PIN, dir);
+  for (int i = 0; i < steps; ++i){
+    digitalWrite(PUL_PIN,HIGH);
+    delayMicroseconds(STEPPER_DELAY);
+    digitalWrite(PUL_PIN,LOW);
+    delayMicroseconds(STEPPER_DELAY);
+  }
 }
 
 void hold_black() {
@@ -89,14 +115,20 @@ void arm_zero() {
 
 
 void loop() {
-  //arm_zero();
-  //return;
-  Arm_pos arm_pos = {ARM_HAND_TEST_1, ARM_MID_TEST_1, ARM_ROOT_TEST_1};
+  Arm_pos arm_pos = {ARM_HAND_TEST_1, ARM_MID_TEST_1, ARM_ROOT_TEST_1 - 400};
+  move_arm(arm_pos, 30, 10);
+  stepper_enable();
+  stepper_move(true, 2000);
+  delay(1000);
+  stepper_move(false, 2000);
+  stepper_disable();
+
+  arm_pos.root += 400;
   move_arm(arm_pos, 30, 10);
   
   flip_servo.write(SERVO_RELEASE_DEG);
   hold_black();
-  delay(2000);
+  delay(500);
   
   arm_pos.root -= 400;
   move_arm(arm_pos, 30, 10);
