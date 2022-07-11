@@ -43,6 +43,12 @@ Servo flip_servo;
 
 #define DEG_90 2600
 
+#define FIRST_STEPPER_STEP 4100
+#define STEPPER_STEP 2000
+
+#define DELAY_SLOW 1000
+#define DELAY_FAST 400
+
 IcsHardSerialClass krs(&Serial, 2, 115200, 1000);
 
 struct Arm_pos {
@@ -75,6 +81,12 @@ const Arm_pos pos_in[HW] = {
 
 const Arm_pos pos_home = {ARM_HAND_ZERO + 200, ARM_MID_ZERO - 4300, ARM_ROOT_ZERO - 200};
 
+const Arm_pos pos_get = {ARM_HAND_ZERO + 1200, ARM_MID_ZERO - 3600, ARM_ROOT_ZERO + 700};
+
+bool received = false;
+
+Arm_pos global_pos;
+
 void setup() {
   Wire.begin(8);
   Wire.setClock(100000);
@@ -96,7 +108,7 @@ void setup() {
   move_arm(pos_home, 100, 10);
   //out_demo();
   //in_demo();
-  flip_demo();
+  //flip_demo();
 }
 
 void flip_demo(){
@@ -363,10 +375,6 @@ void demo() {
   move_arm(arm_pos, 50, 10);
 }
 
-bool received = false;
-
-Arm_pos global_pos;
-
 void demo_receive() {
   if (Wire.available()) {
     global_pos.hand = ARM_HAND_ZERO + ((int)Wire.read() * 256 + (int)Wire.read()) - 10000;
@@ -376,11 +384,75 @@ void demo_receive() {
   }
 }
 
+void get_disc(int *place){
+  stepper_enable();
+  move_arm(pos_home, 50, 10);
+  stepper_move(true, FIRST_STEPPER_STEP + STEPPER_STEP * (*place), DELAY_FAST);
+  move_arm(pos_get, 50, 10);
+  delay(100);
+  hold_black_out();
+  Arm_pos pos = pos_get;
+  pos.root -= 400;
+  move_arm(pos, 50, 10);
+  move_arm(pos_home, 50, 10);
+  stepper_move(false, FIRST_STEPPER_STEP, DELAY_FAST);
+  stepper_disable();
+  *place = 0;
+}
+
+void button_func(){
+  stepper_enable();
+  bool dir = false;
+  int dly = 10;
+  while(digitalRead(FAST_BUTTON1) == LOW && digitalRead(FAST_BUTTON2) == HIGH){
+    dir = false;
+    dly = DELAY_FAST;
+    digitalWrite(DIR_PIN, dir);
+    digitalWrite(PUL_PIN, HIGH);
+    delayMicroseconds(dly);
+    digitalWrite(PUL_PIN, LOW);
+    delayMicroseconds(dly);
+  }
+  while(digitalRead(FAST_BUTTON1) == HIGH && digitalRead(FAST_BUTTON2) == LOW){
+    dir = true;
+    dly = DELAY_FAST;
+    digitalWrite(DIR_PIN, dir);
+    digitalWrite(PUL_PIN, HIGH);
+    delayMicroseconds(dly);
+    digitalWrite(PUL_PIN, LOW);
+    delayMicroseconds(dly);
+  }
+  while(digitalRead(SLOW_BUTTON1) == LOW){
+    dir = false;
+    dly = DELAY_SLOW;
+    digitalWrite(DIR_PIN, dir);
+    digitalWrite(PUL_PIN, HIGH);
+    delayMicroseconds(dly);
+    digitalWrite(PUL_PIN, LOW);
+    delayMicroseconds(dly);
+  }
+  while(digitalRead(SLOW_BUTTON2) == LOW){
+    dir = true;
+    dly = DELAY_SLOW;
+    digitalWrite(DIR_PIN, dir);
+    digitalWrite(PUL_PIN, HIGH);
+    delayMicroseconds(dly);
+    digitalWrite(PUL_PIN, LOW);
+    delayMicroseconds(dly);
+  }
+  stepper_disable();
+}
+
 void loop() {
   if (received){
     Arm_pos reset_pos = {krs.getPos(ARM_HAND), krs.getPos(ARM_MID), ARM_ROOT_ZERO - 200};
     move_arm(reset_pos, 50, 10);
     move_arm(global_pos, 50, 10);
     received = false;
+  }
+  button_func();
+  if (digitalRead(FAST_BUTTON1) == LOW && digitalRead(FAST_BUTTON2) == LOW){
+    int place = 0;
+    get_disc(&place);
   }
 }
