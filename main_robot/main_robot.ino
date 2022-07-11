@@ -43,11 +43,11 @@ Servo flip_servo;
 
 #define DEG_90 2600
 
-#define FIRST_STEPPER_STEP 4100
-#define STEPPER_STEP 2000
+#define FIRST_STEPPER_STEP 4600
+#define STEPPER_STEP 2250
 
-#define DELAY_SLOW 1000
-#define DELAY_FAST 400
+#define DELAY_SLOW 700
+#define DELAY_FAST 300
 
 IcsHardSerialClass krs(&Serial, 2, 115200, 1000);
 
@@ -443,6 +443,20 @@ void button_func(){
   stepper_disable();
 }
 
+void put_disc_out(int *place, int put_col, int put_row){
+  stepper_enable();
+  move_arm(pos_home, 50, 10);
+  if (put_col > (*place))
+    stepper_move(false, STEPPER_STEP * (put_col - (*place)), DELAY_FAST);
+  else if (put_col < (*place))
+    stepper_move(true, STEPPER_STEP * ((*place) - put_col), DELAY_FAST);
+  *place = put_col;
+  move_arm(pos_out[put_row], 50, 10);
+  release_out();
+  move_arm(pos_home, 50, 10);
+  stepper_disable();
+}
+
 void loop() {
   if (received){
     Arm_pos reset_pos = {krs.getPos(ARM_HAND), krs.getPos(ARM_MID), ARM_ROOT_ZERO - 200};
@@ -454,5 +468,6 @@ void loop() {
   if (digitalRead(FAST_BUTTON1) == LOW && digitalRead(FAST_BUTTON2) == LOW){
     int place = 0;
     get_disc(&place);
+    put_disc_out(&place, 7, 3);
   }
 }
