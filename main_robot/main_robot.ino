@@ -84,13 +84,15 @@ const Arm_pos pos_home = {ARM_HAND_ZERO + 200, ARM_MID_ZERO - 4300, ARM_ROOT_ZER
 const Arm_pos pos_get = {ARM_HAND_ZERO + 1200, ARM_MID_ZERO - 3600, ARM_ROOT_ZERO + 700};
 
 bool received = false;
+bool requested = false;
 
-Arm_pos global_pos;
+//Arm_pos global_pos;
 
 void setup() {
   Wire.begin(8);
   Wire.setClock(100000);
-  Wire.onReceive(demo_receive);
+  Wire.onReceive(receive);
+  Wire.onRequest(request);
   flip_servo.attach(9);
   pinMode(FAST_BUTTON1, INPUT_PULLUP);
   pinMode(FAST_BUTTON2, INPUT_PULLUP);
@@ -110,7 +112,7 @@ void setup() {
   //in_demo();
   //flip_demo();
 }
-
+/*
 void flip_demo(){
   Arm_pos pos;
   bool is_black = true;
@@ -202,8 +204,7 @@ void out_demo(){
   release_out();
   move_arm(pos_home, 100, 10);
 }
-
-
+*/
 
 void flip(bool is_black){
   flip_servo.write(SERVO_GRIP_DEG);
@@ -240,12 +241,14 @@ void hold_black_out() {
   digitalWrite(MAGNET_OUT_SWITCH, LOW);
   delay(10);
   digitalWrite(MAGNET_OUT_ON, HIGH);
+  delay(50);
 }
 
 void hold_white_out() {
   digitalWrite(MAGNET_OUT_SWITCH, HIGH);
   delay(10);
   digitalWrite(MAGNET_OUT_ON, HIGH);
+  delay(50);
 }
 
 void release_out() {
@@ -258,12 +261,14 @@ void hold_black_in() {
   digitalWrite(MAGNET_IN_SWITCH, LOW);
   delay(10);
   digitalWrite(MAGNET_IN_ON, HIGH);
+  delay(50);
 }
 
 void hold_white_in() {
   digitalWrite(MAGNET_IN_SWITCH, HIGH);
   delay(10);
   digitalWrite(MAGNET_IN_ON, HIGH);
+  delay(50);
 }
 
 void release_in() {
@@ -295,93 +300,32 @@ void arm_zero() {
   move_arm(ARM_HAND_ZERO, ARM_MID_ZERO, ARM_ROOT_ZERO, 100, 10);
 }
 
-void demo() {
-  Arm_pos arm_pos = {ARM_HAND_TEST_1, ARM_MID_TEST_1, ARM_ROOT_TEST_1 - 400};
-  move_arm(arm_pos, 50, 10);
-  stepper_enable();
-  stepper_move(true, 2000, STEPPER_DELAY_FAST);
-  delay(1000);
-  stepper_move(false, 2000, STEPPER_DELAY_FAST);
-  stepper_disable();
-
-  arm_pos.root += 400;
-  move_arm(arm_pos, 50, 10);
-
-  flip_servo.write(SERVO_RELEASE_DEG);
-  hold_black_out();
-  delay(500);
-
-  arm_pos.root -= 400;
-  move_arm(arm_pos, 50, 10);
-
-  flip_servo.write(SERVO_GRIP_DEG);
-  delay(100);
-  hold_white_in();
-  delay(200);
-  release_out();
-  delay(300);
-  flip_servo.write(SERVO_RELEASE_DEG);
-  delay(300);
-
-  arm_pos.mid = ARM_MID_TEST_2;
-  arm_pos.hand = ARM_HAND_TEST_2;
-  arm_pos.root =  ARM_ROOT_TEST_2 - 200;
-  move_arm(arm_pos, 50, 10);
-
-  arm_pos.root =  ARM_ROOT_TEST_2;
-  move_arm(arm_pos, 50, 10);
-
-  delay(300);
-
-  release_in();
-
-  arm_pos.root -= 400;
-  move_arm(arm_pos, 50, 10);
-
-
-
-  arm_pos = {ARM_HAND_TEST_1, ARM_MID_TEST_1, ARM_ROOT_TEST_1};
-  move_arm(arm_pos, 50, 10);
-
-  flip_servo.write(SERVO_RELEASE_DEG);
-  hold_white_out();
-  delay(500);
-
-  arm_pos.root -= 400;
-  move_arm(arm_pos, 50, 10);
-
-  flip_servo.write(SERVO_GRIP_DEG);
-  delay(100);
-  hold_black_in();
-  delay(200);
-  release_out();
-  delay(300);
-  flip_servo.write(SERVO_RELEASE_DEG);
-  delay(300);
-
-  arm_pos.mid = ARM_MID_TEST_2;
-  arm_pos.hand = ARM_HAND_TEST_2;
-  arm_pos.root =  ARM_ROOT_TEST_2 - 200;
-  move_arm(arm_pos, 50, 10);
-
-  arm_pos.root =  ARM_ROOT_TEST_2;
-  move_arm(arm_pos, 50, 10);
-
-  delay(300);
-
-  release_in();
-
-  arm_pos.root -= 400;
-  move_arm(arm_pos, 50, 10);
-}
-
-void demo_receive() {
+/*
+void receive() {
   if (Wire.available()) {
     global_pos.hand = ARM_HAND_ZERO + ((int)Wire.read() * 256 + (int)Wire.read()) - 10000;
     global_pos.mid = ARM_MID_ZERO + ((int)Wire.read() * 256 + (int)Wire.read()) - 10000;
     global_pos.root = ARM_ROOT_ZERO + ((int)Wire.read() * 256 + (int)Wire.read()) - 10000;
     received = true;
   }
+}
+*/
+
+int mode; // 0: 補給して黒を置く 1: 補給して黒を置く 2: 黒を白にflip 3: 白を黒にflip
+int col;
+int row;
+
+void receive() {
+  if (Wire.available()) {
+    mode = Wire.read();
+    col = Wire.read();
+    row = Wire.read();
+    received = true;
+  }
+}
+
+void request() {
+  Wire.write((byte)received);
 }
 
 void get_disc(int *place){
@@ -445,29 +389,126 @@ void button_func(){
 
 void put_disc_out(int *place, int put_col, int put_row){
   stepper_enable();
-  move_arm(pos_home, 50, 10);
   if (put_col > (*place))
     stepper_move(false, STEPPER_STEP * (put_col - (*place)), DELAY_FAST);
   else if (put_col < (*place))
     stepper_move(true, STEPPER_STEP * ((*place) - put_col), DELAY_FAST);
   *place = put_col;
-  move_arm(pos_out[put_row], 50, 10);
+  Arm_pos pos = pos_out[put_row];
+  move_arm(pos, 50, 10);
   release_out();
+  pos.root -= 800;
+  move_arm(pos, 50, 10);
+  move_arm(pos_home, 50, 10);
+  stepper_disable();
+}
+
+void put_disc_in(int *place, int put_col, int put_row){
+  stepper_enable();
+  if (put_col > (*place))
+    stepper_move(false, STEPPER_STEP * (put_col - (*place)), DELAY_FAST);
+  else if (put_col < (*place))
+    stepper_move(true, STEPPER_STEP * ((*place) - put_col), DELAY_FAST);
+  *place = put_col;
+  Arm_pos pos = pos_in[put_row];
+  move_arm(pos, 50, 10);
+  release_in();
+  pos.root -= 800;
+  move_arm(pos, 50, 10);
+  move_arm(pos_home, 50, 10);
+  stepper_disable();
+}
+
+void reset_arm_place(int *place){
+  stepper_enable();
+  stepper_move(true, STEPPER_STEP * (*place), DELAY_FAST);
+  stepper_disable();
+  *place = 0;
+}
+
+int place = 0;
+
+void demo_get_put(){
+  if (digitalRead(FAST_BUTTON1) == LOW && digitalRead(FAST_BUTTON2) == LOW){
+    get_disc(&place);
+    put_disc_out(&place, 7, 3);
+    reset_arm_place(&place);
+  }
+}
+
+void flip_disc_black_to_white(int *place, int put_col, int put_row){
+  stepper_enable();
+  if (put_col > (*place))
+    stepper_move(false, STEPPER_STEP * (put_col - (*place)), DELAY_FAST);
+  else if (put_col < (*place))
+    stepper_move(true, STEPPER_STEP * ((*place) - put_col), DELAY_FAST);
+  *place = put_col;
+  Arm_pos pos = pos_out[put_row];
+  move_arm(pos, 50, 10);
+  hold_black_out();
+  pos.root -= 800;
+  move_arm(pos, 50, 10);
+  flip(true);
+  pos = pos_in[put_row];
+  pos.root -= 800;
+  move_arm(pos, 50, 10);
+  pos.root += 800;
+  move_arm(pos, 50, 10);
+  release_in();
+  pos.root -= 800;
+  move_arm(pos, 50, 10);
+  move_arm(pos_home, 50, 10);
+  stepper_disable();
+}
+
+void flip_disc_white_to_black(int *place, int put_col, int put_row){
+  stepper_enable();
+  if (put_col > (*place))
+    stepper_move(false, STEPPER_STEP * (put_col - (*place)), DELAY_FAST);
+  else if (put_col < (*place))
+    stepper_move(true, STEPPER_STEP * ((*place) - put_col), DELAY_FAST);
+  *place = put_col;
+  Arm_pos pos = pos_out[put_row];
+  move_arm(pos, 50, 10);
+  hold_white_out();
+  pos.root -= 800;
+  move_arm(pos, 50, 10);
+  flip(false);
+  pos = pos_in[put_row];
+  pos.root -= 800;
+  move_arm(pos, 50, 10);
+  pos.root += 800;
+  move_arm(pos, 50, 10);
+  release_in();
+  pos.root -= 800;
+  move_arm(pos, 50, 10);
   move_arm(pos_home, 50, 10);
   stepper_disable();
 }
 
 void loop() {
+  /*
   if (received){
     Arm_pos reset_pos = {krs.getPos(ARM_HAND), krs.getPos(ARM_MID), ARM_ROOT_ZERO - 200};
     move_arm(reset_pos, 50, 10);
     move_arm(global_pos, 50, 10);
     received = false;
   }
-  button_func();
-  if (digitalRead(FAST_BUTTON1) == LOW && digitalRead(FAST_BUTTON2) == LOW){
-    int place = 0;
-    get_disc(&place);
-    put_disc_out(&place, 7, 3);
+  */
+  if (received){
+    if (mode == 0){
+      get_disc(&place);
+      put_disc_out(&place, col, row);
+    } if (mode == 1){
+      get_disc(&place);
+      flip(true);
+      put_disc_in(&place, col, row);
+    } else if (mode == 2){
+      flip_disc_black_to_white(&place, col, row);
+    } else if (mode == 3){
+      flip_disc_white_to_black(&place, col, row);
+    }
+    received = false;
   }
+  button_func();
 }
