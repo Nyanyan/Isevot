@@ -18,7 +18,7 @@ void setup() {
   digitalWrite(DIR_PIN, HIGH);
 }
 
-#define N_TASKS 6
+#define N_TASKS 12
 
 int tasks[N_TASKS][3] = {
   { -1, -1, -1},
@@ -26,7 +26,13 @@ int tasks[N_TASKS][3] = {
   {3, 3, 3},
   { -1, -1, -1},
   {1, 4, 2},
-  {2, 4, 3}
+  {2, 4, 3},
+  { -1, -1, -1},
+  {0, 5, 5},
+  {3, 4, 4},
+  { -1, -1, -1},
+  {1, 4, 5},
+  {2, 4, 4}
 };
 
 void get_new_disc() {
@@ -35,7 +41,6 @@ void get_new_disc() {
     delayMicroseconds(DELAY_FAST);
     digitalWrite(PUL_PIN, LOW);
     delayMicroseconds(DELAY_FAST);
-    Serial.print('a');
   }
   for (int i = 0; i < 80; ++i) {
     digitalWrite(PUL_PIN, HIGH);
