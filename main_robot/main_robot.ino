@@ -43,11 +43,11 @@ Servo flip_servo;
 
 #define DEG_90 2600
 
-#define FIRST_STEPPER_STEP 4600
+#define FIRST_STEPPER_STEP 4850
 #define STEPPER_STEP 2250
 
 #define DELAY_SLOW 700
-#define DELAY_FAST 300
+#define DELAY_FAST 290
 
 IcsHardSerialClass krs(&Serial, 2, 115200, 1000);
 
@@ -81,7 +81,7 @@ const Arm_pos pos_in[HW] = {
 
 const Arm_pos pos_home = {ARM_HAND_ZERO + 200, ARM_MID_ZERO - 4300, ARM_ROOT_ZERO - 200};
 
-const Arm_pos pos_get = {ARM_HAND_ZERO + 1200, ARM_MID_ZERO - 3600, ARM_ROOT_ZERO + 710};
+const Arm_pos pos_get = {ARM_HAND_ZERO + 1200, ARM_MID_ZERO - 3520, ARM_ROOT_ZERO + 750};
 
 bool received = false;
 bool requested = false;
@@ -208,14 +208,13 @@ void setup() {
 
 void flip(bool is_black) {
   flip_servo.write(SERVO_GRIP_DEG);
-  delay(400);
+  delay(300);
   if (is_black)
     hold_white_in();
   else
     hold_black_in();
-  delay(100);
+  delay(50);
   release_out();
-  delay(100);
   flip_servo.write(SERVO_RELEASE_DEG);
 }
 
