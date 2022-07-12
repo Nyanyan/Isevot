@@ -98,49 +98,43 @@ void get_new_disc() {
 
 void loop() {
 
-  if (Serial.available()) {
-    int idx = 0;
-    int nums[3] = {0, 0, 0};
-    bool minus[3] = {false, false, false};
-    while (idx < 3) {
+  if (Serial.available() >= 3) {
+    int nums[3];
+    bool err = false;
+    for (int i = 0; i < 3; ++i) {
       char elem = Serial.read();
-      Serial.print(idx);
-      Serial.print('\t');
-      Serial.print(elem);
-      Serial.print('\t');
-      Serial.println((int)elem);
-      if (elem == '\n' || elem == '\r') {
-        ++idx;
+      if (elem == '\n') {
+        err = true;
         break;
       }
-      if (elem == '-')
-        minus[idx] = true;
-      else if ('0' <= elem && elem <= '9') {
-        nums[idx] *= 10;
-        nums[idx] += (int)(elem - '0');
-      } else
-        ++idx;
+      nums[i] = (int)elem - (int)'0';
     }
-    Serial.println(' ');
-    while (Serial.available())
-      Serial.read();
-    Serial.print("received ");
-    Serial.print(idx);
-    Serial.print(" data\t");
-    Serial.print(nums[0]);
-    Serial.print('\t');
-    Serial.print(nums[1]);
-    Serial.print('\t');
-    Serial.println(nums[2]);
-    if (idx == 3) {
-      Wire.beginTransmission(8);
+    if (err)
+      Serial.print("9991");
+    else {
       for (int i = 0; i < 3; ++i)
-        Wire.write((byte)nums[i]);
-      Wire.endTransmission();
-      Serial.println("sent");
-    } else {
-      get_new_disc();
-      Serial.println("get new disc");
+        Serial.print(nums[i]);
+      if (nums[0] < 4) {
+        Wire.beginTransmission(8);
+        for (int i = 0; i < 3; ++i)
+          Wire.write((byte)nums[i]);
+        Wire.endTransmission();
+        //Serial.println("sent");
+        while (true) {
+          Wire.requestFrom(8, 1);
+          if (Wire.read())
+            delay(100);
+          else
+            break;
+        }
+      } else {
+        get_new_disc();
+        //Serial.println("get new disc");
+      }
+      char chr = ' ';
+      while (chr != '\n')
+        chr = Serial.read();
+      Serial.print('0');
     }
   }
 
