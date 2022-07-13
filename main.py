@@ -5,7 +5,7 @@ from random import choice
 import tkinter
 
 
-robot = serial.Serial('COM10',115200, timeout=1000000)
+robot = serial.Serial('COM3',115200, timeout=1000000)
 egaroucid = subprocess.Popen('egaroucid5.exe 10'.split(), stdin=subprocess.PIPE, stdout=subprocess.PIPE)
 
 def send_cmds(cmds):
@@ -38,6 +38,7 @@ pixel_virtual = tkinter.PhotoImage(width=1, height=1)
 def on_closing():
     egaroucid.kill()
     app.destroy()
+    print(record)
 
 app.protocol("WM_DELETE_WINDOW", on_closing)
 
@@ -52,8 +53,10 @@ stone_str.set('*● 2 - 2 ○ ')
 stone_label = tkinter.Label(canvas, textvariable=stone_str, font=('', 50))
 stone_label.place(x=250, y=600, anchor=tkinter.CENTER)
 
+record = ''
+
 def ai():
-    global clicked
+    global clicked, record
     grid_str = str(o.player) + '\n'
     for yy in range(hw):
         for xx in range(hw):
@@ -68,7 +71,8 @@ def ai():
     egaroucid.stdin.write(grid_str.encode('utf-8'))
     egaroucid.stdin.flush()
     value, coord = egaroucid.stdout.readline().decode().split()
-    print(value, coord)
+    record += coord
+    print(value, coord, record)
     policy = [int(coord[1]) - 1, ord(coord[0]) - ord('a')]
     flips = o.flippable(policy[0], policy[1])
     cmds = []
@@ -107,10 +111,11 @@ def ai():
     show_grid()
 
 def get_coord(event):
-    global clicked
+    global clicked, record
     y = int(event.widget.cget('text')[0])
     x = int(event.widget.cget('text')[2])
-    print(y, x)
+    record += chr(x + ord('a')) + str(y + 1)
+    print(y, x, record)
     clicked = True
     o.move(y, x)
     if not o.check_legal():
