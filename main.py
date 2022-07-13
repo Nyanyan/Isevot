@@ -31,7 +31,7 @@ legal_buttons = []
 # GUI部分
 app = tkinter.Tk()
 app.geometry('500x700')
-app.title('オセロAIの教科書 サンプルプログラム')
+app.title('Isevot')
 canvas = tkinter.Canvas(app, width=500, height = 700)
 pixel_virtual = tkinter.PhotoImage(width=1, height=1)
 
