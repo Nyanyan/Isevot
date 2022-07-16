@@ -38,7 +38,6 @@ pixel_virtual = tkinter.PhotoImage(width=1, height=1)
 def on_closing():
     egaroucid.kill()
     app.destroy()
-    print(record)
 
 app.protocol("WM_DELETE_WINDOW", on_closing)
 
@@ -71,8 +70,9 @@ def ai():
     egaroucid.stdin.write(grid_str.encode('utf-8'))
     egaroucid.stdin.flush()
     value, coord = egaroucid.stdout.readline().decode().split()
+    print(value, coord)
     record += coord
-    print(value, coord, record)
+    print(record)
     policy = [int(coord[1]) - 1, ord(coord[0]) - ord('a')]
     flips = o.flippable(policy[0], policy[1])
     cmds = []
@@ -114,15 +114,16 @@ def get_coord(event):
     global clicked, record
     y = int(event.widget.cget('text')[0])
     x = int(event.widget.cget('text')[2])
-    record += chr(x + ord('a')) + str(y + 1)
-    print(y, x, record)
+    print(y, x)
+    record += chr(ord('a') + y) + str(y)
+    print(record)
     clicked = True
     o.move(y, x)
     if not o.check_legal():
         o.player = 1 - o.player
         if not o.check_legal():
             o.print_info()
-            ai_exe.kill()
+            egaroucid.kill()
             o.player = -1
             print('終局しました')
     s = ''
