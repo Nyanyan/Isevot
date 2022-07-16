@@ -5,7 +5,7 @@ from random import choice
 import tkinter
 
 
-robot = serial.Serial('COM10',115200, timeout=1000000)
+robot = serial.Serial('COM3',115200, timeout=1000000)
 egaroucid = subprocess.Popen('egaroucid5.exe 10'.split(), stdin=subprocess.PIPE, stdout=subprocess.PIPE)
 
 def send_cmds(cmds):
@@ -52,8 +52,10 @@ stone_str.set('*● 2 - 2 ○ ')
 stone_label = tkinter.Label(canvas, textvariable=stone_str, font=('', 50))
 stone_label.place(x=250, y=600, anchor=tkinter.CENTER)
 
+record = ''
+
 def ai():
-    global clicked
+    global clicked, record
     grid_str = str(o.player) + '\n'
     for yy in range(hw):
         for xx in range(hw):
@@ -69,6 +71,8 @@ def ai():
     egaroucid.stdin.flush()
     value, coord = egaroucid.stdout.readline().decode().split()
     print(value, coord)
+    record += coord
+    print(record)
     policy = [int(coord[1]) - 1, ord(coord[0]) - ord('a')]
     flips = o.flippable(policy[0], policy[1])
     cmds = []
@@ -107,17 +111,19 @@ def ai():
     show_grid()
 
 def get_coord(event):
-    global clicked
+    global clicked, record
     y = int(event.widget.cget('text')[0])
     x = int(event.widget.cget('text')[2])
     print(y, x)
+    record += chr(ord('a') + y) + str(y)
+    print(record)
     clicked = True
     o.move(y, x)
     if not o.check_legal():
         o.player = 1 - o.player
         if not o.check_legal():
             o.print_info()
-            ai_exe.kill()
+            egaroucid.kill()
             o.player = -1
             print('終局しました')
     s = ''
