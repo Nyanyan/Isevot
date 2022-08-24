@@ -30,7 +30,7 @@ Servo flip_servo;
 #define ARM_ROOT 0
 
 #define ARM_HAND_ZERO 7900
-#define ARM_MID_ZERO 8600
+#define ARM_MID_ZERO 8500
 #define ARM_ROOT_ZERO 7700
 
 #define ARM_HAND_TEST_1 (ARM_HAND_ZERO + 1000)
@@ -92,7 +92,7 @@ bool requested = false;
 //Arm_pos global_pos;
 
 void setup() {
-  Wire.begin(8);
+  Wire.begin(9);
   Wire.setClock(100000);
   Wire.onReceive(receive);
   Wire.onRequest(request);

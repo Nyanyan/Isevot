@@ -115,7 +115,12 @@ void loop() {
       for (int i = 0; i < 3; ++i)
         Serial.print(nums[i]);
       if (nums[0] < 4) {
-        Wire.beginTransmission(8);
+        if (nums[0] == 0 || nums[0] == 3)
+          Wire.beginTransmission(8);
+        else{
+          Wire.beginTransmission(9);
+          nums[1] = 7 - nums[1];
+        }
         for (int i = 0; i < 3; ++i)
           Wire.write((byte)nums[i]);
         Wire.endTransmission();
