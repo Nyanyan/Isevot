@@ -126,7 +126,7 @@ void loop() {
         Wire.endTransmission();
         //Serial.println("sent");
         while (true) {
-          if (nums[0] == 0 || nums[0] == 3)
+          if (nums[0] == 0 || nums[0] == 3 || nums[0] == 4)
             Wire.requestFrom(8, 1);
           else
             Wire.requestFrom(9, 1);
