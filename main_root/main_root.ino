@@ -119,14 +119,17 @@ void loop() {
           Wire.beginTransmission(8);
         else{
           Wire.beginTransmission(9);
-          nums[1] = 7 - nums[1];
+          nums[2] = 7 - nums[2];
         }
         for (int i = 0; i < 3; ++i)
           Wire.write((byte)nums[i]);
         Wire.endTransmission();
         //Serial.println("sent");
         while (true) {
-          Wire.requestFrom(8, 1);
+          if (nums[0] == 0 || nums[0] == 3)
+            Wire.requestFrom(8, 1);
+          else
+            Wire.requestFrom(9, 1);
           if (Wire.read())
             delay(100);
           else

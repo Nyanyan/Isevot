@@ -17,6 +17,7 @@ def send_cmds(cmds):
         print(response)
 
 o = othello()
+o.check_legal()
 record = ''
 
 while True:
@@ -56,6 +57,7 @@ while True:
             egaroucid.kill()
             o.player = -1
             print('終局しました')
+            exit()
     s = ''
     if o.player == 0:
         s += '*'
