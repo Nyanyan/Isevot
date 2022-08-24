@@ -82,7 +82,7 @@ const Arm_pos pos_in[HW] = {
 
 const Arm_pos pos_home = {ARM_HAND_ZERO + 200, ARM_MID_ZERO - 4300, ARM_ROOT_ZERO - 200};
 
-const Arm_pos pos_avoid = {ARM_HAND_ZERO + 200, ARM_MID_ZERO - 4000, ARM_ROOT_ZERO - 800};
+const Arm_pos pos_avoid = {ARM_HAND_ZERO + 200, ARM_MID_ZERO - 3800, ARM_ROOT_ZERO - 1000};
 
 const Arm_pos pos_get = {ARM_HAND_ZERO + 1200, ARM_MID_ZERO - 3520, ARM_ROOT_ZERO + 750};
 
@@ -507,6 +507,10 @@ void flip_disc_white_to_black(int *place, int put_col, int put_row) {
   stepper_disable();
 }
 
+void avoid(){
+  move_arm(pos_avoid, 40, 10);
+}
+
 void loop() {
   /*
     if (received){
@@ -528,8 +532,9 @@ void loop() {
       flip_disc_black_to_white(&place, col, row);
     } else if (mode == 3) {
       flip_disc_white_to_black(&place, col, row);
+    } else {
+      avoid();
     }
-    move_arm(pos_avoid, 30, 10);
     received = false;
   }
   button_func();
