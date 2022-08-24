@@ -114,8 +114,8 @@ void loop() {
     else {
       for (int i = 0; i < 3; ++i)
         Serial.print(nums[i]);
-      if (nums[0] < 4) {
-        if (nums[0] == 0 || nums[0] == 3)
+      if (nums[0] < 6) {
+        if (nums[0] == 0 || nums[0] == 3 || nums[0] == 4)
           Wire.beginTransmission(8);
         else{
           Wire.beginTransmission(9);

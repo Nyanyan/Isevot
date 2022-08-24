@@ -41,10 +41,11 @@ while True:
     policy = [int(coord[1]) - 1, ord(coord[0]) - ord('a')]
     flips = o.flippable(policy[0], policy[1])
     cmds = []
-    cmds.append('400')
+    cmds.append('600')
     cmds.append(str(o.player) + str(policy[1]) + str(policy[0]))
     for flip in flips:
         cmds.append(('3' if o.player == 0 else '2') + str(flip[1]) + str(flip[0]))
+    cmds.append(str(o.player + 4) + '00')
     print(cmds)
     send_cmds(cmds)
     o.move(policy[0], policy[1])
