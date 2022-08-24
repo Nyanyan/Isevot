@@ -82,6 +82,8 @@ const Arm_pos pos_in[HW] = {
 
 const Arm_pos pos_home = {ARM_HAND_ZERO + 200, ARM_MID_ZERO - 4300, ARM_ROOT_ZERO - 200};
 
+const Arm_pos pos_avoid = {ARM_HAND_ZERO + 200, ARM_MID_ZERO - 4000, ARM_ROOT_ZERO - 800};
+
 const Arm_pos pos_get = {ARM_HAND_ZERO + 1200, ARM_MID_ZERO - 3520, ARM_ROOT_ZERO + 750};
 
 const Arm_pos pos_zero = {ARM_HAND_ZERO, ARM_MID_ZERO, ARM_ROOT_ZERO};
@@ -527,6 +529,7 @@ void loop() {
     } else if (mode == 3) {
       flip_disc_white_to_black(&place, col, row);
     }
+    move_arm(pos_avoid, 30, 10);
     received = false;
   }
   button_func();

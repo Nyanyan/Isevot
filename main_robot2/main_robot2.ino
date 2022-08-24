@@ -30,8 +30,8 @@ Servo flip_servo;
 #define ARM_ROOT 0
 
 #define ARM_HAND_ZERO 7900
-#define ARM_MID_ZERO 8500
-#define ARM_ROOT_ZERO 7700
+#define ARM_MID_ZERO 8600
+#define ARM_ROOT_ZERO 7600
 
 #define ARM_HAND_TEST_1 (ARM_HAND_ZERO + 1000)
 #define ARM_MID_TEST_1 (ARM_MID_ZERO - 4000)
@@ -81,6 +81,8 @@ const Arm_pos pos_in[HW] = {
 };
 
 const Arm_pos pos_home = {ARM_HAND_ZERO + 200, ARM_MID_ZERO - 4300, ARM_ROOT_ZERO - 200};
+
+const Arm_pos pos_avoid = {ARM_HAND_ZERO + 200, ARM_MID_ZERO - 4000, ARM_ROOT_ZERO - 800};
 
 const Arm_pos pos_get = {ARM_HAND_ZERO + 1200, ARM_MID_ZERO - 3520, ARM_ROOT_ZERO + 750};
 
@@ -527,6 +529,7 @@ void loop() {
     } else if (mode == 3) {
       flip_disc_white_to_black(&place, col, row);
     }
+    move_arm(pos_avoid, 30, 10);
     received = false;
   }
   button_func();
