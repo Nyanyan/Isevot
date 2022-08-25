@@ -5,16 +5,21 @@
 #define ARM_ROOT_ZERO 7700
 
 void setup() {
-  Wire.begin(8);
+  Wire.begin();
   Wire.setClock(100000);
   Serial.begin(115200);
-  Wire.onReceive(receive);
 }
 
-void receive(){
+void receive() {
   Serial.println("receive");
   Serial.print((char)Wire.read());
 }
 
 void loop() {
+  if (Serial.available()) {
+    Serial.read();
+    Wire.requestFrom(8, 19);
+    for (int i = 0; i < 19; ++i)
+      Serial.print((char)Wire.read());
+  }
 }
