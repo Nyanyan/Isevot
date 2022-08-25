@@ -31,7 +31,7 @@ Servo flip_servo;
 
 #define ARM_HAND_ZERO 7900
 #define ARM_MID_ZERO 8600
-#define ARM_ROOT_ZERO 7600
+#define ARM_ROOT_ZERO 7700
 
 #define ARM_HAND_TEST_1 (ARM_HAND_ZERO + 1000)
 #define ARM_MID_TEST_1 (ARM_MID_ZERO - 4000)
@@ -82,7 +82,7 @@ const Arm_pos pos_in[HW] = {
 
 const Arm_pos pos_home = {ARM_HAND_ZERO + 200, ARM_MID_ZERO - 4300, ARM_ROOT_ZERO - 200};
 
-const Arm_pos pos_avoid = {ARM_HAND_ZERO + 200, ARM_MID_ZERO - 3800, ARM_ROOT_ZERO - 1000};
+const Arm_pos pos_avoid = {ARM_HAND_ZERO + 2000, ARM_MID_ZERO - 3800, ARM_ROOT_ZERO - 1000};
 
 const Arm_pos pos_get = {ARM_HAND_ZERO + 1200, ARM_MID_ZERO - 3520, ARM_ROOT_ZERO + 750};
 
@@ -94,7 +94,7 @@ bool requested = false;
 //Arm_pos global_pos;
 
 void setup() {
-  Wire.begin(9);
+  Wire.begin(8);
   Wire.setClock(100000);
   Wire.onReceive(receive);
   Wire.onRequest(request);
@@ -416,7 +416,10 @@ void put_disc_out(int *place, int put_col, int put_row) {
     stepper_move(true, STEPPER_STEP * ((*place) - put_col), DELAY_FAST);
   *place = put_col;
   Arm_pos pos = pos_out[put_row];
+  pos.root -= 800;
   move_arm(pos, 50, 10);
+  pos.root += 800;
+  move_arm(pos, 40, 10);
   release_out();
   pos.root -= 800;
   move_arm(pos, 50, 10);
@@ -432,7 +435,10 @@ void put_disc_in(int *place, int put_col, int put_row) {
     stepper_move(true, STEPPER_STEP * ((*place) - put_col), DELAY_FAST);
   *place = put_col;
   Arm_pos pos = pos_in[put_row];
+  pos.root -= 800;
   move_arm(pos, 50, 10);
+  pos.root += 800;
+  move_arm(pos, 40, 10);
   release_in();
   pos.root -= 800;
   move_arm(pos, 50, 10);
