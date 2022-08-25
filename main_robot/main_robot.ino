@@ -1,7 +1,7 @@
 #include <Wire.h>
 #include <Servo.h>
 #include <IcsHardSerialClass.h>
-#include "robot1.h"
+#include "robot2.h"
 
 Servo flip_servo;
 
@@ -535,7 +535,7 @@ void loop() {
       flip_disc_black_to_white(&place, col, row);
     } else if (mode == 3) {
       flip_disc_white_to_black(&place, col, row);
-    } else {
+    } else if (mode == 4) {
       avoid();
     }
     received = false;
