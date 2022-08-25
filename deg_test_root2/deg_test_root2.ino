@@ -6,11 +6,14 @@
 
 void setup() {
   Wire.begin(8);
-  Wire.setClock(100000);
   Serial.begin(115200);
+  Wire.onReceive(receive);
+}
+
+void receive(){
+  Serial.println("receive");
+  Serial.print((char)Wire.read());
 }
 
 void loop() {
-  if (Wire.available())
-    Serial.print((char)Wire.read());
 }
