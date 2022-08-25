@@ -37,90 +37,18 @@ Servo flip_servo;
 
 IcsHardSerialClass krs(&Serial, 2, 115200, 1000);
 
-struct Arm_pos {
-  uint32_t hand;
-  uint32_t mid;
-  uint32_t root;
-};
+uint32_t degs[3];
 
 void setup() {
   Wire.begin(8);
   Wire.setClock(100000);
   Wire.onRequest(request);
   flip_servo.attach(9);
-  pinMode(BLACK_MAGNET, OUTPUT);
-  pinMode(WHITE_MAGNET, OUTPUT);
-  pinMode(PUL_PIN, OUTPUT);
-  pinMode(DIR_PIN, OUTPUT);
-  pinMode(ENA_PIN, OUTPUT);
   krs.begin();
   flip_servo.write(SERVO_RELEASE_DEG);
-
-  //Arm_pos arm_pos = {ARM_HAND_TEST_2, ARM_MID_TEST_2, ARM_ROOT_TEST_2};
-  //move_arm(arm_pos, 50, 10);
-  //for (int i = 0; i < 3; ++i)
-  //  krs.setFree(i);
-  //for(;;);
 }
 
-void stepper_enable() {
-  digitalWrite(ENA_PIN, HIGH);
-}
-
-void stepper_disable() {
-  digitalWrite(ENA_PIN, LOW);
-}
-
-void stepper_move(bool dir, int steps) {
-  digitalWrite(DIR_PIN, dir);
-  for (int i = 0; i < steps; ++i) {
-    digitalWrite(PUL_PIN, HIGH);
-    delayMicroseconds(STEPPER_DELAY);
-    digitalWrite(PUL_PIN, LOW);
-    delayMicroseconds(STEPPER_DELAY);
-  }
-}
-
-void hold_black() {
-  digitalWrite(BLACK_MAGNET, HIGH);
-  digitalWrite(WHITE_MAGNET, LOW);
-}
-
-void hold_white() {
-  digitalWrite(BLACK_MAGNET, LOW);
-  digitalWrite(WHITE_MAGNET, HIGH);
-}
-
-void release_both() {
-  digitalWrite(BLACK_MAGNET, LOW);
-  digitalWrite(WHITE_MAGNET, LOW);
-}
-
-void move_arm(uint32_t deg_hand, uint32_t deg_mid, uint32_t deg_root, uint32_t num, int sleep) {
-  deg_hand = max(3500, min(11500, deg_hand));
-  deg_mid = max(3500, min(11500, deg_mid));
-  deg_root = max(3500, min(11500, deg_root));
-  uint32_t hand_now = krs.getPos(ARM_HAND);
-  uint32_t mid_now = krs.getPos(ARM_MID);
-  uint32_t root_now = krs.getPos(ARM_ROOT);
-  for (int i = 1; i <= num; ++i) {
-    krs.setPos(ARM_HAND, hand_now * (num - i) / num + deg_hand * i / num);
-    krs.setPos(ARM_MID, mid_now * (num - i) / num + deg_mid * i / num);
-    krs.setPos(ARM_ROOT, root_now * (num - i) / num + deg_root * i / num);
-    delay(sleep);
-  }
-}
-
-void move_arm(Arm_pos arm_pos, uint32_t num, int sleep) {
-  move_arm(arm_pos.hand, arm_pos.mid, arm_pos.root, num, sleep);
-}
-
-void arm_zero() {
-  move_arm(ARM_HAND_ZERO, ARM_MID_ZERO, ARM_ROOT_ZERO, 100, 10);
-}
-
-
-void send_deg(int deg) {
+void send_deg(uint32_t deg) {
   int digits[5];
   for (int i = 0; i < 5; ++i){
     digits[i] = deg % 10;
@@ -132,15 +60,13 @@ void send_deg(int deg) {
 }
 
 void request(){
-  int deg;
-  deg = krs.getPos(ARM_HAND);
-  send_deg(deg);
-  deg = krs.getPos(ARM_MID);
-  send_deg(deg);
-  deg = krs.getPos(ARM_ROOT);
-  send_deg(deg);
+  for (int i = 0; i < 3; ++i)
+    send_deg(degs[i]);
   Wire.write('\n');
 }
 
 void loop() {
+  degs[0] = krs.getPos(ARM_HAND);
+  degs[1] = krs.getPos(ARM_MID);
+  degs[2] = krs.getPos(ARM_ROOT);
 }
