@@ -6,6 +6,7 @@
 
 void setup() {
   Wire.begin(8);
+  Wire.setClock(100000);
   Serial.begin(115200);
   Wire.onReceive(receive);
 }
