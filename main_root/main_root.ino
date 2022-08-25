@@ -109,33 +109,36 @@ void loop() {
       }
       nums[i] = (int)elem - (int)'0';
     }
-    if (err)
+    if (err) {
       Serial.print("9991");
-    else {
-      for (int i = 0; i < 3; ++i)
-        Serial.print(nums[i]);
+    } else {
       if (nums[0] < 6) {
-        if (nums[0] == 0 || nums[0] == 3 || nums[0] == 4)
+        if (nums[0] == 0 || nums[0] == 3 || nums[0] == 4) {
           Wire.beginTransmission(8);
-        else{
+        } else {
           Wire.beginTransmission(9);
           nums[2] = 7 - nums[2];
         }
+        for (int i = 0; i < 3; ++i)
+          Serial.print(nums[i]);
         for (int i = 0; i < 3; ++i)
           Wire.write((byte)nums[i]);
         Wire.endTransmission();
         //Serial.println("sent");
         while (true) {
-          if (nums[0] == 0 || nums[0] == 3 || nums[0] == 4)
+          if (nums[0] == 0 || nums[0] == 3 || nums[0] == 4) {
             Wire.requestFrom(8, 1);
-          else
+          } else {
             Wire.requestFrom(9, 1);
+          }
           if (Wire.read())
             delay(100);
           else
             break;
         }
       } else {
+        for (int i = 0; i < 3; ++i)
+          Serial.print(nums[i]);
         get_new_disc();
         //Serial.println("get new disc");
       }
