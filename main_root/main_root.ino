@@ -110,15 +110,20 @@ void loop() {
       nums[i] = (int)elem - (int)'0';
     }
     if (err) {
-      Serial.print("9991");
+      Serial.print("19991");
     } else {
-      if (nums[0] < 6) {
+      if (nums[0] != 6) {
+        int i2c_id = 0;
         if (nums[0] == 0 || nums[0] == 3 || nums[0] == 4) {
-          Wire.beginTransmission(8);
+          i2c_id = 8;
         } else {
-          Wire.beginTransmission(9);
+          i2c_id = 9;
           nums[2] = 7 - nums[2];
         }
+        Wire.beginTransmission(i2c_id);
+        if (nums[0] == 5)
+          nums[0] = 4;
+        Serial.print(i2c_id);
         for (int i = 0; i < 3; ++i)
           Serial.print(nums[i]);
         for (int i = 0; i < 3; ++i)
@@ -126,17 +131,14 @@ void loop() {
         Wire.endTransmission();
         //Serial.println("sent");
         while (true) {
-          if (nums[0] == 0 || nums[0] == 3 || nums[0] == 4) {
-            Wire.requestFrom(8, 1);
-          } else {
-            Wire.requestFrom(9, 1);
-          }
+          Wire.requestFrom(i2c_id, 1);
           if (Wire.read())
             delay(100);
           else
             break;
         }
       } else {
+        Serial.print("0");
         for (int i = 0; i < 3; ++i)
           Serial.print(nums[i]);
         get_new_disc();

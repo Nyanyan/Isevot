@@ -12,7 +12,7 @@ def send_cmds(cmds):
         print(cmd)
         cmd += '\n'
         robot.write(cmd.encode())
-        print(robot.read(3))
+        print(robot.read(4))
         response = robot.read()
         print(response)
 
