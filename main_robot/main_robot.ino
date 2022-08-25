@@ -216,8 +216,12 @@ void flip(bool is_black) {
   else
     hold_black_in();
   delay(50);
-  release_out();
+  if (is_black)
+    release_black_out();
+  else
+    release_white_out();
   flip_servo.write(SERVO_RELEASE_DEG);
+  off_out();
 }
 
 void stepper_enable() {
@@ -269,10 +273,27 @@ void hold_white_out() {
   delay(100);
 }
 
-void release_out() {
+void release_black_out() {
+  digitalWrite(MAGNET_OUT_ON, LOW);
+  delay(10);
+  digitalWrite(MAGNET_OUT_SWITCH, HIGH);
+  delay(10);
+  digitalWrite(MAGNET_OUT_ON, HIGH);
+  delay(10);
+}
+
+void release_white_out() {
+  digitalWrite(MAGNET_OUT_ON, LOW);
+  delay(10);
   digitalWrite(MAGNET_OUT_SWITCH, LOW);
   delay(10);
+  digitalWrite(MAGNET_OUT_ON, HIGH);
+  delay(10);
+}
+
+void off_out(){
   digitalWrite(MAGNET_OUT_ON, LOW);
+  digitalWrite(MAGNET_OUT_SWITCH, LOW);
 }
 
 void hold_black_in() {
@@ -289,10 +310,27 @@ void hold_white_in() {
   delay(100);
 }
 
-void release_in() {
+void release_black_in() {
+  digitalWrite(MAGNET_IN_ON, LOW);
+  delay(10);
+  digitalWrite(MAGNET_IN_SWITCH, HIGH);
+  delay(10);
+  digitalWrite(MAGNET_IN_ON, HIGH);
+  delay(10);
+}
+
+void release_white_in() {
+  digitalWrite(MAGNET_IN_ON, LOW);
+  delay(10);
   digitalWrite(MAGNET_IN_SWITCH, LOW);
   delay(10);
+  digitalWrite(MAGNET_IN_ON, HIGH);
+  delay(10);
+}
+
+void off_in(){
   digitalWrite(MAGNET_IN_ON, LOW);
+  digitalWrite(MAGNET_IN_SWITCH, LOW);
 }
 
 void move_arm(uint32_t deg_hand, uint32_t deg_mid, uint32_t deg_root, uint32_t num, int sleep) {
@@ -405,7 +443,7 @@ void button_func() {
   stepper_disable();
 }
 
-void put_disc_out(int *place, int put_col, int put_row) {
+void put_disc_out(int *place, int put_col, int put_row, bool is_black) {
   stepper_enable();
   if (put_col > (*place))
     stepper_move(false, STEPPER_STEP * (put_col - (*place)), DELAY_FAST);
@@ -417,14 +455,18 @@ void put_disc_out(int *place, int put_col, int put_row) {
   move_arm(pos, 50, 10);
   pos.root += 800;
   move_arm(pos, 40, 10);
-  release_out();
+  if (is_black)
+    release_black_out();
+  else
+    release_white_out();
   pos.root -= 800;
   move_arm(pos, 50, 10);
+  off_out();
   move_arm(pos_home, 50, 10);
   stepper_disable();
 }
 
-void put_disc_in(int *place, int put_col, int put_row) {
+void put_disc_in(int *place, int put_col, int put_row, bool is_black) {
   stepper_enable();
   if (put_col > (*place))
     stepper_move(false, STEPPER_STEP * (put_col - (*place)), DELAY_FAST);
@@ -436,9 +478,13 @@ void put_disc_in(int *place, int put_col, int put_row) {
   move_arm(pos, 50, 10);
   pos.root += 800;
   move_arm(pos, 40, 10);
-  release_in();
+  if (is_black)
+    release_black_in();
+  else
+    release_white_in();
   pos.root -= 800;
   move_arm(pos, 50, 10);
+  off_in();
   move_arm(pos_home, 50, 10);
   stepper_disable();
 }
@@ -452,6 +498,7 @@ void reset_arm_place(int *place) {
 
 int place = 0;
 
+/*
 void demo_get_put() {
   if (digitalRead(FAST_BUTTON1) == LOW && digitalRead(FAST_BUTTON2) == LOW) {
     get_disc(&place);
@@ -459,6 +506,7 @@ void demo_get_put() {
     reset_arm_place(&place);
   }
 }
+*/
 
 void flip_disc_black_to_white(int *place, int put_col, int put_row) {
   stepper_enable();
@@ -478,9 +526,10 @@ void flip_disc_black_to_white(int *place, int put_col, int put_row) {
   move_arm(pos, 50, 10);
   pos.root += 800;
   move_arm(pos, 50, 10);
-  release_in();
+  release_white_in();
   pos.root -= 800;
   move_arm(pos, 50, 10);
+  off_in();
   move_arm(pos_home, 50, 10);
   stepper_disable();
 }
@@ -503,9 +552,10 @@ void flip_disc_white_to_black(int *place, int put_col, int put_row) {
   move_arm(pos, 50, 10);
   pos.root += 800;
   move_arm(pos, 50, 10);
-  release_in();
+  release_black_in();
   pos.root -= 800;
   move_arm(pos, 50, 10);
+  off_in();
   move_arm(pos_home, 50, 10);
   stepper_disable();
 }
@@ -526,11 +576,11 @@ void loop() {
   if (received) {
     if (mode == 0) {
       get_disc(&place);
-      put_disc_out(&place, col, row);
+      put_disc_out(&place, col, row, true);
     } if (mode == 1) {
       get_disc(&place);
       flip(true);
-      put_disc_in(&place, col, row);
+      put_disc_in(&place, col, row, false);
     } else if (mode == 2) {
       flip_disc_black_to_white(&place, col, row);
     } else if (mode == 3) {
