@@ -35,7 +35,7 @@ Servo flip_servo;
 
 #define DEG_90 2600
 
-IcsHardSerialClass krs(&Serial, EN_PIN, 115200, 1000);
+IcsHardSerialClass krs(&Serial, 2, 115200, 1000);
 
 struct Arm_pos {
   uint32_t hand;
@@ -58,6 +58,8 @@ void setup() {
 
   //Arm_pos arm_pos = {ARM_HAND_TEST_2, ARM_MID_TEST_2, ARM_ROOT_TEST_2};
   //move_arm(arm_pos, 50, 10);
+  //for (int i = 0; i < 3; ++i)
+  //  krs.setFree(i);
   //for(;;);
 }
 
@@ -131,11 +133,11 @@ void send_deg(int deg) {
 
 void request(){
   int deg;
-  deg = krs.setFree(2);
+  deg = krs.getPos(ARM_HAND);
   send_deg(deg);
-  deg = krs.setFree(1);
+  deg = krs.getPos(ARM_MID);
   send_deg(deg);
-  deg = krs.setFree(0);
+  deg = krs.getPos(ARM_ROOT);
   send_deg(deg);
   Wire.write('\n');
 }

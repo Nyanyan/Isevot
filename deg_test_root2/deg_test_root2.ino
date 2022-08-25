@@ -16,7 +16,7 @@ void loop() {
   if (Serial.available()) {
     Serial.println("\n");
     Serial.println((char)Serial.read());
-    Wire.requestFrom(8, 19);
+    Serial.println(Wire.requestFrom(8, 19));
     Serial.println("requested");
     for (int i = 0; i < 19; ++i)
       Serial.print((char)Wire.read());
