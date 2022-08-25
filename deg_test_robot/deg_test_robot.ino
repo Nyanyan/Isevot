@@ -45,6 +45,7 @@ struct Arm_pos {
 
 void setup() {
   Wire.begin();
+  Wire.setClock(100000);
   flip_servo.attach(9);
   pinMode(BLACK_MAGNET, OUTPUT);
   pinMode(WHITE_MAGNET, OUTPUT);
@@ -122,14 +123,15 @@ void send_deg(int deg) {
     digits[i] = deg % 10;
     deg /= 10;
   }
+  Wire.beginTransmission(8);
   for (int i = 4; i >= 0; --i){
     Wire.write('0' + digits[i]);
   }
   Wire.write(' ');
+  Wire.endTransmission();
 }
 
 void loop() {
-  Wire.beginTransmission(8);
   int deg;
   deg = krs.setFree(2);
   send_deg(deg);
@@ -137,6 +139,7 @@ void loop() {
   send_deg(deg);
   deg = krs.setFree(0);
   send_deg(deg);
+  Wire.beginTransmission(8);
   Wire.write('\n');
   Wire.endTransmission();
 }
