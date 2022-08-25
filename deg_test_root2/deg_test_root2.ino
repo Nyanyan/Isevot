@@ -12,7 +12,6 @@ void setup() {
 }
 
 void loop() {
-  Serial.print((int)Serial.available());
   if (Serial.available()) {
     Serial.println("\n");
     Serial.println((char)Serial.read());
