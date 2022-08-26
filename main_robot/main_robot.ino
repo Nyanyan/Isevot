@@ -1,15 +1,15 @@
 #include <Wire.h>
 #include <Servo.h>
 #include <IcsHardSerialClass.h>
-#include "robot2.h"
+#include "robot1.h"
 
-Servo flip_servo;
+Servo flip_servo_out;
+Servo flip_servo_in;
+
+#define SERVO_OUT 9
+#define SERVO_IN 10
 
 #define HW 8
-
-#define SERVO_GRIP_DEG 44
-#define SERVO_RELEASE_DEG 145
-#define SERVO_AVOID_DEG 165
 
 #define FAST_BUTTON1 A0
 #define FAST_BUTTON2 A1
@@ -63,24 +63,24 @@ struct Arm_pos {
 
 // 手前から
 const Arm_pos pos_out[HW] = {
-  {ARM_HAND_ZERO + 82,   ARM_MID_ZERO - 4567, ARM_ROOT_ZERO + 850 },
-  {ARM_HAND_ZERO + 391,  ARM_MID_ZERO - 4310, ARM_ROOT_ZERO + 883 },
-  {ARM_HAND_ZERO + 559,  ARM_MID_ZERO - 4034, ARM_ROOT_ZERO + 977 },
-  {ARM_HAND_ZERO + 671,  ARM_MID_ZERO - 3757, ARM_ROOT_ZERO + 1090},
-  {ARM_HAND_ZERO + 868,  ARM_MID_ZERO - 3445, ARM_ROOT_ZERO + 1213},
-  {ARM_HAND_ZERO + 1074, ARM_MID_ZERO - 3123, ARM_ROOT_ZERO + 1363},
-  {ARM_HAND_ZERO + 1251, ARM_MID_ZERO - 2760, ARM_ROOT_ZERO + 1524},
-  {ARM_HAND_ZERO + 1505, ARM_MID_ZERO - 2325, ARM_ROOT_ZERO + 1733}
+  {ARM_HAND_ZERO + 582,  ARM_MID_ZERO - 4567, ARM_ROOT_ZERO + 850 },
+  {ARM_HAND_ZERO + 891,  ARM_MID_ZERO - 4260, ARM_ROOT_ZERO + 883 },
+  {ARM_HAND_ZERO + 959,  ARM_MID_ZERO - 3934, ARM_ROOT_ZERO + 977 },
+  {ARM_HAND_ZERO + 1171, ARM_MID_ZERO - 3607, ARM_ROOT_ZERO + 1090},
+  {ARM_HAND_ZERO + 1368, ARM_MID_ZERO - 3295, ARM_ROOT_ZERO + 1213},
+  {ARM_HAND_ZERO + 1574, ARM_MID_ZERO - 2873, ARM_ROOT_ZERO + 1363},
+  {ARM_HAND_ZERO + 1751, ARM_MID_ZERO - 2460, ARM_ROOT_ZERO + 1524},
+  {ARM_HAND_ZERO + 2005, ARM_MID_ZERO - 2025, ARM_ROOT_ZERO + 1733}
 };
 const Arm_pos pos_in[HW] = {
-  {ARM_HAND_ZERO + 557,  ARM_MID_ZERO - 3868, ARM_ROOT_ZERO + 1053},
-  {ARM_HAND_ZERO + 763,  ARM_MID_ZERO - 3527, ARM_ROOT_ZERO + 1184},
-  {ARM_HAND_ZERO + 978,  ARM_MID_ZERO - 3178, ARM_ROOT_ZERO + 1335},
-  {ARM_HAND_ZERO + 1165, ARM_MID_ZERO - 2830, ARM_ROOT_ZERO + 1486},
-  {ARM_HAND_ZERO + 1380, ARM_MID_ZERO - 2434, ARM_ROOT_ZERO + 1674},
-  {ARM_HAND_ZERO + 1595, ARM_MID_ZERO - 1979, ARM_ROOT_ZERO + 1892},
-  {ARM_HAND_ZERO + 1895, ARM_MID_ZERO - 1347, ARM_ROOT_ZERO + 2199},
-  {ARM_HAND_ZERO + 2406, ARM_MID_ZERO - 41,   ARM_ROOT_ZERO + 2815}
+  {ARM_HAND_ZERO + 57,   ARM_MID_ZERO - 3868, ARM_ROOT_ZERO + 1053},
+  {ARM_HAND_ZERO + 263,  ARM_MID_ZERO - 3527, ARM_ROOT_ZERO + 1184},
+  {ARM_HAND_ZERO + 478,  ARM_MID_ZERO - 3178, ARM_ROOT_ZERO + 1335},
+  {ARM_HAND_ZERO + 665,  ARM_MID_ZERO - 2830, ARM_ROOT_ZERO + 1486},
+  {ARM_HAND_ZERO + 880,  ARM_MID_ZERO - 2434, ARM_ROOT_ZERO + 1674},
+  {ARM_HAND_ZERO + 1095, ARM_MID_ZERO - 1979, ARM_ROOT_ZERO + 1892},
+  {ARM_HAND_ZERO + 1395, ARM_MID_ZERO - 1347, ARM_ROOT_ZERO + 2199},
+  {ARM_HAND_ZERO + 1906, ARM_MID_ZERO - 41,   ARM_ROOT_ZERO + 2815}
 };
 
 /*
@@ -125,7 +125,8 @@ void setup() {
   Wire.setClock(100000);
   Wire.onReceive(receive);
   Wire.onRequest(request);
-  flip_servo.attach(9);
+  flip_servo_out.attach(SERVO_OUT);
+  flip_servo_in.attach(SERVO_IN);
   pinMode(FAST_BUTTON1, INPUT_PULLUP);
   pinMode(FAST_BUTTON2, INPUT_PULLUP);
   pinMode(SLOW_BUTTON1, INPUT_PULLUP);
@@ -138,7 +139,8 @@ void setup() {
   pinMode(DIR_PIN, OUTPUT);
   pinMode(ENA_PIN, OUTPUT);
   krs.begin();
-  flip_servo.write(SERVO_RELEASE_DEG);
+  flip_servo_out.write(SERVO_OUT_RELEASE_DEG);
+  flip_servo_in.write(SERVO_IN_RELEASE_DEG);
   move_arm(pos_avoid, ARM_MOVE_NUM, 10);
   //out_demo();
   //in_demo();
@@ -146,7 +148,8 @@ void setup() {
 }
 
 void flip(bool is_black) {
-  flip_servo.write(SERVO_GRIP_DEG);
+  flip_servo_out.write(SERVO_OUT_GRIP_DEG);
+  flip_servo_in.write(SERVO_IN_GRIP_DEG);
   delay(300);
   if (is_black)
     hold_white_in();
@@ -163,7 +166,8 @@ void flip(bool is_black) {
   else
     release_white_out();
   */
-  flip_servo.write(SERVO_RELEASE_DEG);
+  flip_servo_out.write(SERVO_OUT_RELEASE_DEG);
+  flip_servo_in.write(SERVO_IN_RELEASE_DEG);
   off_out();
 }
 
@@ -362,14 +366,20 @@ void request() {
 }
 
 void get_disc(int *place) {
+  flip_servo_out.write(SERVO_OUT_RELEASE_DEG);
+  flip_servo_in.write(SERVO_IN_RELEASE_DEG);
   stepper_enable();
   move_arm(pos_home, 50, 10);
   stepper_move(true, FIRST_STEPPER_STEP + STEPPER_STEP * (*place), DELAY_FAST);
-  move_arm(pos_get, ARM_MOVE_NUM, 10);
+  Arm_pos pos = pos_get;
+  pos.root -= 800;
+  move_arm(pos, ARM_MOVE_NUM, 10);
+  pos.root += 800;
+  move_arm(pos, ARM_MOVE_NUM, 10);
   delay(100);
   hold_black_out();
-  Arm_pos pos = pos_get;
-  pos.root -= 400;
+  pos = pos_get;
+  pos.root -= 800;
   move_arm(pos, ARM_MOVE_NUM, 10);
   move_arm(pos_home, ARM_MOVE_NUM, 10);
   stepper_move(false, FIRST_STEPPER_STEP, DELAY_FAST);
@@ -427,6 +437,8 @@ void put_disc_out(int *place, int put_col, int put_row, bool is_black) {
   else if (put_col < (*place))
     stepper_move(true, STEPPER_STEP * ((*place) - put_col), DELAY_FAST);
   *place = put_col;
+  flip_servo_out.write(SERVO_OUT_AVOID_DEG);
+  flip_servo_in.write(SERVO_IN_AVOID_DEG);
   Arm_pos pos = pos_out[put_row];
   pos.root -= 800;
   move_arm(pos, ARM_MOVE_NUM, 10);
@@ -450,6 +462,8 @@ void put_disc_in(int *place, int put_col, int put_row, bool is_black) {
   else if (put_col < (*place))
     stepper_move(true, STEPPER_STEP * ((*place) - put_col), DELAY_FAST);
   *place = put_col;
+  flip_servo_out.write(SERVO_OUT_AVOID_DEG);
+  flip_servo_in.write(SERVO_IN_AVOID_DEG);
   Arm_pos pos = pos_in[put_row];
   pos.root -= 800;
   move_arm(pos, ARM_MOVE_NUM, 10);
@@ -482,17 +496,20 @@ void flip_disc_black_to_white(int *place, int put_col, int put_row) {
   else if (put_col < (*place))
     stepper_move(true, STEPPER_STEP * ((*place) - put_col), DELAY_FAST);
   *place = put_col;
-  flip_servo.write(SERVO_AVOID_DEG);
+  flip_servo_out.write(SERVO_OUT_AVOID_DEG);
+  flip_servo_in.write(SERVO_IN_AVOID_DEG);
   Arm_pos pos = pos_out[put_row];
   pos.root -= 800;
   move_arm(pos, ARM_MOVE_NUM, 10);
   pos.root += 800;
   move_arm(pos, ARM_MOVE_NUM, 10);
   hold_black_out();
-  flip_servo.write(SERVO_RELEASE_DEG);
+  delay(100);
   pos.root -= 800;
   move_arm(pos, ARM_MOVE_NUM, 10);
   flip(true);
+  flip_servo_out.write(SERVO_OUT_AVOID_DEG);
+  flip_servo_in.write(SERVO_IN_AVOID_DEG);
   pos = pos_in[put_row];
   pos.root -= 800;
   move_arm(pos, ARM_MOVE_NUM, 10);
@@ -504,6 +521,8 @@ void flip_disc_black_to_white(int *place, int put_col, int put_row) {
   off_in();
   move_arm(pos_home, ARM_MOVE_NUM, 10);
   stepper_disable();
+  flip_servo_out.write(SERVO_OUT_RELEASE_DEG);
+  flip_servo_in.write(SERVO_IN_RELEASE_DEG);
 }
 
 void flip_disc_white_to_black(int *place, int put_col, int put_row) {
@@ -513,17 +532,20 @@ void flip_disc_white_to_black(int *place, int put_col, int put_row) {
   else if (put_col < (*place))
     stepper_move(true, STEPPER_STEP * ((*place) - put_col), DELAY_FAST);
   *place = put_col;
-  flip_servo.write(SERVO_AVOID_DEG);
+  flip_servo_out.write(SERVO_OUT_AVOID_DEG);
+  flip_servo_in.write(SERVO_IN_AVOID_DEG);
   Arm_pos pos = pos_out[put_row];
   pos.root -= 800;
   move_arm(pos, ARM_MOVE_NUM, 10);
   pos.root += 800;
   move_arm(pos, ARM_MOVE_NUM, 10);
   hold_white_out();
-  flip_servo.write(SERVO_RELEASE_DEG);
+  delay(100);
   pos.root -= 800;
   move_arm(pos, ARM_MOVE_NUM, 10);
   flip(false);
+  flip_servo_out.write(SERVO_OUT_AVOID_DEG);
+  flip_servo_in.write(SERVO_IN_AVOID_DEG);
   pos = pos_in[put_row];
   pos.root -= 800;
   move_arm(pos, ARM_MOVE_NUM, 10);
@@ -535,6 +557,8 @@ void flip_disc_white_to_black(int *place, int put_col, int put_row) {
   off_in();
   move_arm(pos_home, ARM_MOVE_NUM, 10);
   stepper_disable();
+  flip_servo_out.write(SERVO_OUT_RELEASE_DEG);
+  flip_servo_in.write(SERVO_IN_RELEASE_DEG);
 }
 
 void avoid(){
