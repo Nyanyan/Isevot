@@ -9,6 +9,7 @@ Servo flip_servo;
 
 #define SERVO_GRIP_DEG 44
 #define SERVO_RELEASE_DEG 145
+#define SERVO_AVOID_DEG 165
 
 #define FAST_BUTTON1 A0
 #define FAST_BUTTON2 A1
@@ -40,8 +41,8 @@ Servo flip_servo;
 
 #define DEG_90 2600
 
-#define FIRST_STEPPER_STEP 4800
-#define STEPPER_STEP 2270
+#define FIRST_STEPPER_STEP 4500
+#define STEPPER_STEP 2325
 
 #define DELAY_SLOW 700
 #define DELAY_MID_FAST 400
@@ -49,6 +50,8 @@ Servo flip_servo;
 
 #define BLACK_HOLD HIGH
 #define WHITE_HOLD LOW
+
+#define ARM_MOVE_NUM 25
 
 IcsHardSerialClass krs(&Serial, 2, 115200, 1000);
 
@@ -61,23 +64,23 @@ struct Arm_pos {
 // 手前から
 const Arm_pos pos_out[HW] = {
   {ARM_HAND_ZERO + 82,   ARM_MID_ZERO - 4567, ARM_ROOT_ZERO + 850 },
-  {ARM_HAND_ZERO + 391,  ARM_MID_ZERO - 4310, ARM_ROOT_ZERO + 888 },
-  {ARM_HAND_ZERO + 559,  ARM_MID_ZERO - 4034, ARM_ROOT_ZERO + 982 },
-  {ARM_HAND_ZERO + 671,  ARM_MID_ZERO - 3757, ARM_ROOT_ZERO + 1095},
-  {ARM_HAND_ZERO + 868,  ARM_MID_ZERO - 3445, ARM_ROOT_ZERO + 1218},
-  {ARM_HAND_ZERO + 1074, ARM_MID_ZERO - 3123, ARM_ROOT_ZERO + 1368},
-  {ARM_HAND_ZERO + 1251, ARM_MID_ZERO - 2760, ARM_ROOT_ZERO + 1529},
-  {ARM_HAND_ZERO + 1505, ARM_MID_ZERO - 2325, ARM_ROOT_ZERO + 1738}
+  {ARM_HAND_ZERO + 391,  ARM_MID_ZERO - 4310, ARM_ROOT_ZERO + 883 },
+  {ARM_HAND_ZERO + 559,  ARM_MID_ZERO - 4034, ARM_ROOT_ZERO + 977 },
+  {ARM_HAND_ZERO + 671,  ARM_MID_ZERO - 3757, ARM_ROOT_ZERO + 1090},
+  {ARM_HAND_ZERO + 868,  ARM_MID_ZERO - 3445, ARM_ROOT_ZERO + 1213},
+  {ARM_HAND_ZERO + 1074, ARM_MID_ZERO - 3123, ARM_ROOT_ZERO + 1363},
+  {ARM_HAND_ZERO + 1251, ARM_MID_ZERO - 2760, ARM_ROOT_ZERO + 1524},
+  {ARM_HAND_ZERO + 1505, ARM_MID_ZERO - 2325, ARM_ROOT_ZERO + 1733}
 };
 const Arm_pos pos_in[HW] = {
-  {ARM_HAND_ZERO + 557,  ARM_MID_ZERO - 3868, ARM_ROOT_ZERO + 1058},
-  {ARM_HAND_ZERO + 763,  ARM_MID_ZERO - 3527, ARM_ROOT_ZERO + 1189},
-  {ARM_HAND_ZERO + 978,  ARM_MID_ZERO - 3178, ARM_ROOT_ZERO + 1340},
-  {ARM_HAND_ZERO + 1165, ARM_MID_ZERO - 2830, ARM_ROOT_ZERO + 1491},
-  {ARM_HAND_ZERO + 1380, ARM_MID_ZERO - 2434, ARM_ROOT_ZERO + 1679},
-  {ARM_HAND_ZERO + 1595, ARM_MID_ZERO - 1979, ARM_ROOT_ZERO + 1897},
-  {ARM_HAND_ZERO + 1895, ARM_MID_ZERO - 1347, ARM_ROOT_ZERO + 2204},
-  {ARM_HAND_ZERO + 2406, ARM_MID_ZERO - 41,   ARM_ROOT_ZERO + 2820}
+  {ARM_HAND_ZERO + 557,  ARM_MID_ZERO - 3868, ARM_ROOT_ZERO + 1053},
+  {ARM_HAND_ZERO + 763,  ARM_MID_ZERO - 3527, ARM_ROOT_ZERO + 1184},
+  {ARM_HAND_ZERO + 978,  ARM_MID_ZERO - 3178, ARM_ROOT_ZERO + 1335},
+  {ARM_HAND_ZERO + 1165, ARM_MID_ZERO - 2830, ARM_ROOT_ZERO + 1486},
+  {ARM_HAND_ZERO + 1380, ARM_MID_ZERO - 2434, ARM_ROOT_ZERO + 1674},
+  {ARM_HAND_ZERO + 1595, ARM_MID_ZERO - 1979, ARM_ROOT_ZERO + 1892},
+  {ARM_HAND_ZERO + 1895, ARM_MID_ZERO - 1347, ARM_ROOT_ZERO + 2199},
+  {ARM_HAND_ZERO + 2406, ARM_MID_ZERO - 41,   ARM_ROOT_ZERO + 2815}
 };
 
 /*
@@ -136,104 +139,11 @@ void setup() {
   pinMode(ENA_PIN, OUTPUT);
   krs.begin();
   flip_servo.write(SERVO_RELEASE_DEG);
-  move_arm(pos_home, 100, 10);
+  move_arm(pos_avoid, ARM_MOVE_NUM, 10);
   //out_demo();
   //in_demo();
   //flip_demo();
 }
-/*
-  void flip_demo(){
-  Arm_pos pos;
-  bool is_black = true;
-  for (int i = 0; i < 8; ++i){
-    pos = pos_out[i];
-    pos.root -= 400;
-    move_arm(pos, 50, 10);
-
-    pos.root += 400;
-    move_arm(pos, 50, 10);
-    if (is_black)
-      hold_black_out();
-    else
-      hold_white_out();
-
-    pos.root -= 800;
-    move_arm(pos, 50, 10);
-
-    flip(is_black);
-    if (i < 7)
-      pos = pos_in[i + 1];
-    else
-      pos = pos_in[i];
-    pos.root -= 400;
-    move_arm(pos, 50, 10);
-
-    pos.root += 400;
-    move_arm(pos, 50, 10);
-    release_in();
-
-    pos.root -= 400;
-    move_arm(pos, 50, 10);
-
-    is_black = !is_black;
-  }
-  move_arm(pos_home, 100, 10);
-  }
-
-  void in_demo(){
-  Arm_pos pos;
-  for (int i = 0; i < 8; ++i){
-    pos = pos_in[i];
-    pos.root -= 400;
-    move_arm(pos, 50, 10);
-
-    pos.root += 400;
-    move_arm(pos, 50, 10);
-    release_in();
-
-    pos.root -= 400;
-    move_arm(pos, 50, 10);
-
-    pos.root += 400;
-    move_arm(pos, 50, 10);
-    hold_black_in();
-
-    pos.root -= 400;
-    move_arm(pos, 50, 10);
-
-  }
-  move_arm(pos_in[7], 50, 10);
-  release_in();
-  move_arm(pos_home, 100, 10);
-  }
-
-  void out_demo(){
-  Arm_pos pos;
-  for (int i = 0; i < 8; ++i){
-    pos = pos_out[i];
-    pos.root -= 400;
-    move_arm(pos, 50, 10);
-
-    pos.root += 400;
-    move_arm(pos, 50, 10);
-    release_out();
-
-    pos.root -= 400;
-    move_arm(pos, 50, 10);
-
-    pos.root += 400;
-    move_arm(pos, 50, 10);
-    hold_black_out();
-
-    pos.root -= 400;
-    move_arm(pos, 50, 10);
-
-  }
-  move_arm(pos_out[7], 50, 10);
-  release_out();
-  move_arm(pos_home, 100, 10);
-  }
-*/
 
 void flip(bool is_black) {
   flip_servo.write(SERVO_GRIP_DEG);
@@ -247,10 +157,12 @@ void flip(bool is_black) {
     hold_white_out();
   else
     hold_black_out();
+  /*
   if (is_black)
     release_black_out();
   else
     release_white_out();
+  */
   flip_servo.write(SERVO_RELEASE_DEG);
   off_out();
 }
@@ -376,17 +288,39 @@ void off_in(){
   digitalWrite(MAGNET_IN_SWITCH, LOW);
 }
 
-void move_arm(uint32_t deg_hand, uint32_t deg_mid, uint32_t deg_root, uint32_t num, int sleep) {
-  deg_hand = max(3500, min(11500, deg_hand));
-  deg_mid = max(3500, min(11500, deg_mid));
-  deg_root = max(3500, min(11500, deg_root));
-  uint32_t hand_now = krs.getPos(ARM_HAND);
-  uint32_t mid_now = krs.getPos(ARM_MID);
-  uint32_t root_now = krs.getPos(ARM_ROOT);
-  for (int i = 1; i <= num; ++i) {
-    krs.setPos(ARM_HAND, hand_now * (num - i) / num + deg_hand * i / num);
-    krs.setPos(ARM_MID, mid_now * (num - i) / num + deg_mid * i / num);
-    krs.setPos(ARM_ROOT, root_now * (num - i) / num + deg_root * i / num);
+int32_t abs32(int32_t x){
+  if (x >= 0)
+    return x;
+  return -x;
+}
+
+int32_t max32(int32_t a, int32_t b){
+  if (a >= b)
+    return a;
+  return b;
+}
+
+int32_t min32(int32_t a, int32_t b){
+  if (a <= b)
+    return a;
+  return b;
+}
+
+void move_arm(int32_t deg_hand, int32_t deg_mid, int32_t deg_root, int32_t num, int sleep) {
+  deg_hand = max32(3500, min32(11500, deg_hand));
+  deg_mid = max32(3500, min32(11500, deg_mid));
+  deg_root = max32(3500, min32(11500, deg_root));
+  int32_t hand_now = krs.getPos(ARM_HAND);
+  int32_t mid_now = krs.getPos(ARM_MID);
+  int32_t root_now = krs.getPos(ARM_ROOT);
+  int32_t max_deg = abs32(deg_hand - hand_now);
+  max_deg = max32(max_deg, abs32(deg_mid - mid_now));
+  max_deg = max32(max_deg, abs32(deg_root - root_now));
+  int32_t steps = max32(1, (max_deg + num - 1) / num);
+  for (int i = 1; i <= steps; ++i) {
+    krs.setPos(ARM_HAND, hand_now * (steps - i) / steps + deg_hand * i / steps);
+    krs.setPos(ARM_MID, mid_now * (steps - i) / steps + deg_mid * i / steps);
+    krs.setPos(ARM_ROOT, root_now * (steps - i) / steps + deg_root * i / steps);
     delay(sleep);
   }
 }
@@ -396,7 +330,7 @@ void move_arm(Arm_pos arm_pos, uint32_t num, int sleep) {
 }
 
 void arm_zero() {
-  move_arm(ARM_HAND_ZERO, ARM_MID_ZERO, ARM_ROOT_ZERO, 100, 10);
+  move_arm(ARM_HAND_ZERO, ARM_MID_ZERO, ARM_ROOT_ZERO, ARM_MOVE_NUM, 10);
 }
 
 /*
@@ -431,13 +365,13 @@ void get_disc(int *place) {
   stepper_enable();
   move_arm(pos_home, 50, 10);
   stepper_move(true, FIRST_STEPPER_STEP + STEPPER_STEP * (*place), DELAY_FAST);
-  move_arm(pos_get, 50, 10);
+  move_arm(pos_get, ARM_MOVE_NUM, 10);
   delay(100);
   hold_black_out();
   Arm_pos pos = pos_get;
   pos.root -= 400;
-  move_arm(pos, 50, 10);
-  move_arm(pos_home, 50, 10);
+  move_arm(pos, ARM_MOVE_NUM, 10);
+  move_arm(pos_home, ARM_MOVE_NUM, 10);
   stepper_move(false, FIRST_STEPPER_STEP, DELAY_FAST);
   stepper_disable();
   *place = 0;
@@ -495,17 +429,17 @@ void put_disc_out(int *place, int put_col, int put_row, bool is_black) {
   *place = put_col;
   Arm_pos pos = pos_out[put_row];
   pos.root -= 800;
-  move_arm(pos, 50, 10);
+  move_arm(pos, ARM_MOVE_NUM, 10);
   pos.root += 800;
-  move_arm(pos, 40, 10);
+  move_arm(pos, ARM_MOVE_NUM, 10);
   if (is_black)
     release_black_out();
   else
     release_white_out();
   pos.root -= 800;
-  move_arm(pos, 50, 10);
+  move_arm(pos, ARM_MOVE_NUM, 10);
   off_out();
-  move_arm(pos_home, 50, 10);
+  move_arm(pos_home, ARM_MOVE_NUM, 10);
   stepper_disable();
 }
 
@@ -518,17 +452,17 @@ void put_disc_in(int *place, int put_col, int put_row, bool is_black) {
   *place = put_col;
   Arm_pos pos = pos_in[put_row];
   pos.root -= 800;
-  move_arm(pos, 50, 10);
+  move_arm(pos, ARM_MOVE_NUM, 10);
   pos.root += 800;
-  move_arm(pos, 40, 10);
+  move_arm(pos, ARM_MOVE_NUM, 10);
   if (is_black)
     release_black_in();
   else
     release_white_in();
   pos.root -= 800;
-  move_arm(pos, 50, 10);
+  move_arm(pos, ARM_MOVE_NUM, 10);
   off_in();
-  move_arm(pos_home, 50, 10);
+  move_arm(pos_home, ARM_MOVE_NUM, 10);
   stepper_disable();
 }
 
@@ -541,16 +475,6 @@ void reset_arm_place(int *place) {
 
 int place = 0;
 
-/*
-void demo_get_put() {
-  if (digitalRead(FAST_BUTTON1) == LOW && digitalRead(FAST_BUTTON2) == LOW) {
-    get_disc(&place);
-    put_disc_out(&place, 7, 3);
-    reset_arm_place(&place);
-  }
-}
-*/
-
 void flip_disc_black_to_white(int *place, int put_col, int put_row) {
   stepper_enable();
   if (put_col > (*place))
@@ -558,25 +482,27 @@ void flip_disc_black_to_white(int *place, int put_col, int put_row) {
   else if (put_col < (*place))
     stepper_move(true, STEPPER_STEP * ((*place) - put_col), DELAY_FAST);
   *place = put_col;
+  flip_servo.write(SERVO_AVOID_DEG);
   Arm_pos pos = pos_out[put_row];
   pos.root -= 800;
-  move_arm(pos, 50, 10);
+  move_arm(pos, ARM_MOVE_NUM, 10);
   pos.root += 800;
-  move_arm(pos, 50, 10);
+  move_arm(pos, ARM_MOVE_NUM, 10);
   hold_black_out();
+  flip_servo.write(SERVO_RELEASE_DEG);
   pos.root -= 800;
-  move_arm(pos, 50, 10);
+  move_arm(pos, ARM_MOVE_NUM, 10);
   flip(true);
   pos = pos_in[put_row];
   pos.root -= 800;
-  move_arm(pos, 50, 10);
+  move_arm(pos, ARM_MOVE_NUM, 10);
   pos.root += 800;
-  move_arm(pos, 50, 10);
+  move_arm(pos, ARM_MOVE_NUM, 10);
   release_white_in();
   pos.root -= 800;
-  move_arm(pos, 50, 10);
+  move_arm(pos, ARM_MOVE_NUM, 10);
   off_in();
-  move_arm(pos_home, 50, 10);
+  move_arm(pos_home, ARM_MOVE_NUM, 10);
   stepper_disable();
 }
 
@@ -587,25 +513,27 @@ void flip_disc_white_to_black(int *place, int put_col, int put_row) {
   else if (put_col < (*place))
     stepper_move(true, STEPPER_STEP * ((*place) - put_col), DELAY_FAST);
   *place = put_col;
+  flip_servo.write(SERVO_AVOID_DEG);
   Arm_pos pos = pos_out[put_row];
   pos.root -= 800;
-  move_arm(pos, 50, 10);
+  move_arm(pos, ARM_MOVE_NUM, 10);
   pos.root += 800;
-  move_arm(pos, 50, 10);
+  move_arm(pos, ARM_MOVE_NUM, 10);
   hold_white_out();
+  flip_servo.write(SERVO_RELEASE_DEG);
   pos.root -= 800;
-  move_arm(pos, 50, 10);
+  move_arm(pos, ARM_MOVE_NUM, 10);
   flip(false);
   pos = pos_in[put_row];
   pos.root -= 800;
-  move_arm(pos, 50, 10);
+  move_arm(pos, ARM_MOVE_NUM, 10);
   pos.root += 800;
-  move_arm(pos, 50, 10);
+  move_arm(pos, ARM_MOVE_NUM, 10);
   release_black_in();
   pos.root -= 800;
-  move_arm(pos, 50, 10);
+  move_arm(pos, ARM_MOVE_NUM, 10);
   off_in();
-  move_arm(pos_home, 50, 10);
+  move_arm(pos_home, ARM_MOVE_NUM, 10);
   stepper_disable();
 }
 
