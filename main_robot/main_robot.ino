@@ -1,7 +1,7 @@
 #include <Wire.h>
 #include <Servo.h>
 #include <IcsHardSerialClass.h>
-#include "robot1.h"
+#include "robot2.h"
 
 Servo flip_servo_out;
 Servo flip_servo_in;
@@ -64,23 +64,23 @@ struct Arm_pos {
 // 手前から
 const Arm_pos pos_out[HW] = {
   {ARM_HAND_ZERO + 582,  ARM_MID_ZERO - 4567, ARM_ROOT_ZERO + 850 },
-  {ARM_HAND_ZERO + 891,  ARM_MID_ZERO - 4260, ARM_ROOT_ZERO + 883 },
+  {ARM_HAND_ZERO + 891,  ARM_MID_ZERO - 4210, ARM_ROOT_ZERO + 853 },
   {ARM_HAND_ZERO + 959,  ARM_MID_ZERO - 3934, ARM_ROOT_ZERO + 977 },
-  {ARM_HAND_ZERO + 1171, ARM_MID_ZERO - 3607, ARM_ROOT_ZERO + 1090},
-  {ARM_HAND_ZERO + 1368, ARM_MID_ZERO - 3295, ARM_ROOT_ZERO + 1213},
-  {ARM_HAND_ZERO + 1574, ARM_MID_ZERO - 2873, ARM_ROOT_ZERO + 1363},
-  {ARM_HAND_ZERO + 1751, ARM_MID_ZERO - 2460, ARM_ROOT_ZERO + 1524},
-  {ARM_HAND_ZERO + 2005, ARM_MID_ZERO - 2025, ARM_ROOT_ZERO + 1733}
+  {ARM_HAND_ZERO + 1171, ARM_MID_ZERO - 3577, ARM_ROOT_ZERO + 1090},
+  {ARM_HAND_ZERO + 1368, ARM_MID_ZERO - 3265, ARM_ROOT_ZERO + 1213},
+  {ARM_HAND_ZERO + 1574, ARM_MID_ZERO - 2843, ARM_ROOT_ZERO + 1363},
+  {ARM_HAND_ZERO + 1751, ARM_MID_ZERO - 2490, ARM_ROOT_ZERO + 1574},
+  {ARM_HAND_ZERO + 2005, ARM_MID_ZERO - 2045, ARM_ROOT_ZERO + 1703}
 };
 const Arm_pos pos_in[HW] = {
-  {ARM_HAND_ZERO + 57,   ARM_MID_ZERO - 3868, ARM_ROOT_ZERO + 1053},
-  {ARM_HAND_ZERO + 263,  ARM_MID_ZERO - 3527, ARM_ROOT_ZERO + 1184},
-  {ARM_HAND_ZERO + 478,  ARM_MID_ZERO - 3178, ARM_ROOT_ZERO + 1335},
-  {ARM_HAND_ZERO + 665,  ARM_MID_ZERO - 2830, ARM_ROOT_ZERO + 1486},
-  {ARM_HAND_ZERO + 880,  ARM_MID_ZERO - 2434, ARM_ROOT_ZERO + 1674},
-  {ARM_HAND_ZERO + 1095, ARM_MID_ZERO - 1979, ARM_ROOT_ZERO + 1892},
-  {ARM_HAND_ZERO + 1395, ARM_MID_ZERO - 1347, ARM_ROOT_ZERO + 2199},
-  {ARM_HAND_ZERO + 1906, ARM_MID_ZERO - 41,   ARM_ROOT_ZERO + 2815}
+  {ARM_HAND_ZERO + 57,   ARM_MID_ZERO - 3928, ARM_ROOT_ZERO + 1053},
+  {ARM_HAND_ZERO + 263,  ARM_MID_ZERO - 3627, ARM_ROOT_ZERO + 1184},
+  {ARM_HAND_ZERO + 478,  ARM_MID_ZERO - 3318, ARM_ROOT_ZERO + 1335},
+  {ARM_HAND_ZERO + 665,  ARM_MID_ZERO - 2900, ARM_ROOT_ZERO + 1486},
+  {ARM_HAND_ZERO + 880,  ARM_MID_ZERO - 2504, ARM_ROOT_ZERO + 1674},
+  {ARM_HAND_ZERO + 1095, ARM_MID_ZERO - 2049, ARM_ROOT_ZERO + 1892},
+  {ARM_HAND_ZERO + 1395, ARM_MID_ZERO - 1417, ARM_ROOT_ZERO + 2199},
+  {ARM_HAND_ZERO + 1906, ARM_MID_ZERO - 251,  ARM_ROOT_ZERO + 2785}
 };
 
 /*
@@ -107,11 +107,11 @@ const Arm_pos pos_in[HW] = {
 };
 */
 
-const Arm_pos pos_home = {ARM_HAND_ZERO + 200, ARM_MID_ZERO - 4300, ARM_ROOT_ZERO - 200};
+const Arm_pos pos_home = {ARM_HAND_ZERO + 200, ARM_MID_ZERO - 4300, ARM_ROOT_ZERO - 400};
 
-const Arm_pos pos_avoid = {ARM_HAND_ZERO + 2000, ARM_MID_ZERO - 3800, ARM_ROOT_ZERO - 1000};
+const Arm_pos pos_avoid = {ARM_HAND_ZERO + 2000, ARM_MID_ZERO - 3300, ARM_ROOT_ZERO - 1000};
 
-const Arm_pos pos_get = {ARM_HAND_ZERO + 1200, ARM_MID_ZERO - 3520, ARM_ROOT_ZERO + 750};
+const Arm_pos pos_get = {ARM_HAND_ZERO + 1200, ARM_MID_ZERO - 3440, ARM_ROOT_ZERO + 830};
 
 const Arm_pos pos_zero = {ARM_HAND_ZERO, ARM_MID_ZERO, ARM_ROOT_ZERO};
 
@@ -374,10 +374,10 @@ void get_disc(int *place) {
   Arm_pos pos = pos_get;
   pos.root -= 800;
   move_arm(pos, ARM_MOVE_NUM, 10);
+  hold_black_out();
   pos.root += 800;
   move_arm(pos, ARM_MOVE_NUM, 10);
   delay(100);
-  hold_black_out();
   pos = pos_get;
   pos.root -= 800;
   move_arm(pos, ARM_MOVE_NUM, 10);
@@ -501,9 +501,9 @@ void flip_disc_black_to_white(int *place, int put_col, int put_row) {
   Arm_pos pos = pos_out[put_row];
   pos.root -= 800;
   move_arm(pos, ARM_MOVE_NUM, 10);
+  hold_black_out();
   pos.root += 800;
   move_arm(pos, ARM_MOVE_NUM, 10);
-  hold_black_out();
   delay(100);
   pos.root -= 800;
   move_arm(pos, ARM_MOVE_NUM, 10);
@@ -537,9 +537,9 @@ void flip_disc_white_to_black(int *place, int put_col, int put_row) {
   Arm_pos pos = pos_out[put_row];
   pos.root -= 800;
   move_arm(pos, ARM_MOVE_NUM, 10);
+  hold_white_out();
   pos.root += 800;
   move_arm(pos, ARM_MOVE_NUM, 10);
-  hold_white_out();
   delay(100);
   pos.root -= 800;
   move_arm(pos, ARM_MOVE_NUM, 10);
