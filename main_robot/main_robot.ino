@@ -1,7 +1,14 @@
 #include <Wire.h>
 #include <Servo.h>
 #include <IcsHardSerialClass.h>
-#include "robot2.h"
+
+#define ROBOT_ID 1
+
+#if ROBOT_ID == 1
+  #include "robot1.h"
+#else
+  #include "robot2.h"
+#endif
 
 Servo flip_servo_out;
 Servo flip_servo_in;
@@ -30,6 +37,12 @@ Servo flip_servo_in;
 #define ARM_HAND 2
 #define ARM_MID 1
 #define ARM_ROOT 0
+
+#define DISC_SUPPLIER 4
+#define DISC_SUPPLY_GET 4826
+#define DISC_SUPPLY_READY 10140
+#define DISC_SUPPLY_SHAKE 200
+
 
 #define ARM_HAND_TEST_1 (ARM_HAND_ZERO + 1000)
 #define ARM_MID_TEST_1 (ARM_MID_ZERO - 4000)
@@ -565,6 +578,21 @@ void avoid(){
   move_arm(pos_avoid, 40, 10);
 }
 
+void set_disc(){
+  krs.setPos(DISC_SUPPLIER, DISC_SUPPLY_GET);
+  delay(800);
+  for (int i = 0; i < 5; ++i){
+    krs.setPos(DISC_SUPPLIER, DISC_SUPPLY_GET + DISC_SUPPLY_SHAKE);
+    delay(100);
+    krs.setPos(DISC_SUPPLIER, DISC_SUPPLY_GET - DISC_SUPPLY_SHAKE);
+    delay(100);
+  }
+  krs.setPos(DISC_SUPPLIER, DISC_SUPPLY_GET);
+  delay(200);
+  krs.setPos(DISC_SUPPLIER, DISC_SUPPLY_READY);
+  delay(800);
+}
+
 void loop() {
   /*
     if (received){
@@ -588,6 +616,8 @@ void loop() {
       flip_disc_white_to_black(&place, col, row);
     } else if (mode == 4) {
       avoid();
+    } else if (mode == 5){
+      set_disc();
     }
     received = false;
   }
