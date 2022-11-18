@@ -41,7 +41,7 @@ while True:
     policy = [int(coord[1]) - 1, ord(coord[0]) - ord('a')]
     flips = o.flippable(policy[0], policy[1])
     cmds = []
-    #cmds.append('600')
+    cmds.append('600')
     cmds.append(str(o.player) + str(policy[1]) + str(policy[0]))
     for flip in flips:
         cmds.append(('3' if o.player == 0 else '2') + str(flip[1]) + str(flip[0]))
@@ -58,7 +58,7 @@ while True:
             egaroucid.kill()
             o.player = -1
             print('終局しました')
-            exit()
+            break
     s = ''
     if o.player == 0:
         s += '*'
@@ -74,4 +74,10 @@ while True:
     else:
         s += ' '
     o.print_info()
-    input()
+    if input() == 'q':
+        break
+
+egaroucid.kill()
+quit_cmds = ['000', '107']
+send_cmds(quit_cmds)
+robot.close()
