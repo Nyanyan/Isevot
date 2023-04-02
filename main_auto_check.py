@@ -3,9 +3,11 @@ import serial
 from othello_py import *
 from random import choice
 
+serial_port = 'COM3'
+executable = '"./Egaroucid_for_Console/Egaroucid_for_Console.exe" -level 10 -quiet'
 
-robot = serial.Serial('COM3',115200, timeout=1000000)
-egaroucid = subprocess.Popen('egaroucid5.exe 10'.split(), stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+robot = serial.Serial(serial_port, 115200, timeout=1000000)
+egaroucid = subprocess.Popen(executable.split(), stdin=subprocess.PIPE, stdout=subprocess.PIPE)
 
 def send_cmds(cmds):
     for cmd in cmds:
@@ -21,21 +23,22 @@ o.check_legal()
 record = ''
 
 while True:
-    grid_str = str(o.player) + '\n'
+    grid_str = 'setboard '
     for yy in range(hw):
         for xx in range(hw):
             if o.grid[yy][xx] == black:
-                grid_str += '0'
+                grid_str += 'X'
             elif o.grid[yy][xx] == white:
-                grid_str += '1'
+                grid_str += 'O'
             else:
-                grid_str += '.'
-        grid_str += '\n'
-    #print(grid_str)
+                grid_str += '-'
+    grid_str += ' '
+    grid_str += 'X' if o.player == black else 'O'
+    grid_str += '\n'
     egaroucid.stdin.write(grid_str.encode('utf-8'))
     egaroucid.stdin.flush()
-    value, coord = egaroucid.stdout.readline().decode().split()
-    print(value, coord)
+    coord = egaroucid.stdout.readline().decode().split()
+    print(coord)
     record += coord
     print(record)
     policy = [int(coord[1]) - 1, ord(coord[0]) - ord('a')]
