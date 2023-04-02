@@ -7,7 +7,7 @@ serial_port = 'COM3'
 executable = '"./Egaroucid_for_Console/Egaroucid_for_Console.exe" -level 10 -quiet'
 
 robot = serial.Serial(serial_port, 115200, timeout=1000000)
-egaroucid = subprocess.Popen(executable.split(), stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+egaroucid = subprocess.Popen(executable, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, shell=True)
 
 def send_cmds(cmds):
     for cmd in cmds:
@@ -37,7 +37,9 @@ while True:
     grid_str += '\n'
     egaroucid.stdin.write(grid_str.encode('utf-8'))
     egaroucid.stdin.flush()
-    coord = egaroucid.stdout.readline().decode().split()
+    egaroucid.stdin.write('go\n'.encode('utf-8'))
+    egaroucid.stdin.flush()
+    coord = egaroucid.stdout.readline().decode()
     print(coord)
     record += coord
     print(record)
