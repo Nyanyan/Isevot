@@ -4,8 +4,8 @@ from othello_py import *
 
 import tkinter as tk
 
-serial_port = 'COM3'
-executable = '"./Egaroucid_for_Console/Egaroucid_for_Console.exe" -level 10 -quiet'
+serial_port = '/dev/ttyUSB0'
+executable = '"./Egaroucid_for_Console/Egaroucid_for_Console.out" -level 5 -t 2 -quiet'
 
 
 
@@ -89,6 +89,7 @@ def reset():
     global o, record
     o = othello()
     o.check_legal()
+    o.print_info()
     record = ''
     egaroucid.stdin.write('init'.encode('utf-8'))
     egaroucid.stdin.flush()
@@ -103,18 +104,21 @@ def exit_all():
 
 root = tk.Tk()
 root.title("Isevot")
-root.geometry("300x200")
+root.geometry("500x400")
 
 frame = tk.Frame(root)
 frame.pack(fill = tk.BOTH, padx=20,pady=10)
 
-next_button = tk.Button(frame, text="next", command=next_move)
+BUTTON_WIDTH = 450
+BUTTON_HEIGHT = 6
+
+next_button = tk.Button(frame, text="next", command=next_move, width=BUTTON_WIDTH, height=BUTTON_HEIGHT)
 next_button.pack()
 
-reset_button = tk.Button(frame, text="reset", command=reset)
+reset_button = tk.Button(frame, text="reset", command=reset, width=BUTTON_WIDTH, height=BUTTON_HEIGHT)
 reset_button.pack()
 
-exit_button = tk.Button(frame, text="exit", command=exit_all)
+exit_button = tk.Button(frame, text="exit", command=exit_all, width=BUTTON_WIDTH, height=BUTTON_HEIGHT)
 exit_button.pack()
 
 root.mainloop()
