@@ -91,8 +91,10 @@ def reset():
     o.check_legal()
     o.print_info()
     record = ''
-    egaroucid.stdin.write('init'.encode('utf-8'))
-    egaroucid.stdin.flush()
+
+def robot_reset():
+    quit_cmds = ['000', '107']
+    send_cmds(quit_cmds)
 
 def exit_all():
     egaroucid.kill()
@@ -116,6 +118,9 @@ next_button = tk.Button(frame, text="next", command=next_move, width=BUTTON_WIDT
 next_button.pack()
 
 reset_button = tk.Button(frame, text="reset", command=reset, width=BUTTON_WIDTH, height=BUTTON_HEIGHT)
+reset_button.pack()
+
+reset_button = tk.Button(frame, text="robot_reset", command=robot_reset, width=BUTTON_WIDTH, height=BUTTON_HEIGHT)
 reset_button.pack()
 
 exit_button = tk.Button(frame, text="exit", command=exit_all, width=BUTTON_WIDTH, height=BUTTON_HEIGHT)
