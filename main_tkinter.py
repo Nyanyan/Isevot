@@ -57,7 +57,7 @@ def next_move():
     cmds_additional = []
     for flip in flips:
         cmds_additional.append(('3' if o.player == 0 else '2') + str(flip[1]) + str(flip[0]))
-    cmds_additional.sort()
+    cmds_additional.sort(reverse=True)
     cmds.extend(cmds_additional)
     cmds.append(str(o.player + 4) + '00')
     print(cmds)
