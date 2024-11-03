@@ -5,7 +5,7 @@ from othello_py import *
 import tkinter as tk
 
 serial_port = '/dev/ttyUSB0'
-executable = '"./Egaroucid_for_Console/Egaroucid_for_Console.out" -level 5 -t 2 -quiet'
+executable = '"./Egaroucid_for_Console/Egaroucid_for_Console.out" -level 10 -t 2 -quiet'
 
 
 
