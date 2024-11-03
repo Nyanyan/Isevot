@@ -112,7 +112,7 @@ frame = tk.Frame(root)
 frame.pack(fill = tk.BOTH, padx=20,pady=10)
 
 BUTTON_WIDTH = 450
-BUTTON_HEIGHT = 6
+BUTTON_HEIGHT = 5
 
 next_button = tk.Button(frame, text="next", command=next_move, width=BUTTON_WIDTH, height=BUTTON_HEIGHT)
 next_button.pack()
