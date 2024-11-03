@@ -54,8 +54,11 @@ def next_move():
     cmds = []
     cmds.append('600')
     cmds.append(str(o.player) + str(policy[1]) + str(policy[0]))
+    cmds_additional = []
     for flip in flips:
-        cmds.append(('3' if o.player == 0 else '2') + str(flip[1]) + str(flip[0]))
+        cmds_additional.append(('3' if o.player == 0 else '2') + str(flip[1]) + str(flip[0]))
+    cmds_additional.sort()
+    cmds.extend(cmds_additional)
     cmds.append(str(o.player + 4) + '00')
     print(cmds)
     send_cmds(cmds)
